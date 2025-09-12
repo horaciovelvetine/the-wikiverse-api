@@ -46,3 +46,4 @@ dist-ssr
 
 .env
 target/*
+node_modules
