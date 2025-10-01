@@ -1,0 +1,16 @@
+{
+	"name": "the-wikiverse-api",
+	"version": "0.0.1-SNAPSHOT",
+	"description": "Backend API to support the Wikiverse",
+	"private": true,
+	"scripts": {
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"format:java": "prettier --write \"src/**/*.java\"",
+		"format:java:check": "prettier --check \"src/**/*.java\""
+	},
+	"devDependencies": {
+		"prettier": "^3.1.1",
+		"prettier-plugin-java": "^2.3.0"
+	}
+}

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>4.0.0-M2</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
+		<!-- lookup parent from repository -->
 	</parent>
 	<groupId>edu.velvet</groupId>
 	<artifactId>Wikiverse.api</artifactId>
@@ -18,7 +19,7 @@
 	<licenses>
 		<license/>
 	</licenses>
-	
+
 	<developers>
 		<developer>
 			<id>horaciovelvetine</id>
@@ -36,7 +37,7 @@
 	<!-- !VERSIONS -->
 	<properties>
 		<java.version>21</java.version>
-		<wikidata.toolkit.version>0.14.7</wikidata.toolkit.version>
+		<wikidata.toolkit.version>0.17.0</wikidata.toolkit.version>
 	</properties>
 
 	<!-- !DEPENDENCIES -->
@@ -101,5 +102,6 @@
 			</plugin>
 		</plugins>
 	</build>
+
 
 </project>
