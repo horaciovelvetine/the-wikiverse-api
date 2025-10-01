@@ -10,6 +10,7 @@ This project uses Prettier for consistent code formatting. The following npm scr
 - `npm run format:java:check` - Check formatting for Java files only
 
 ### Usage
+
 ```bash
 # Format all Java files
 npm run format:java
