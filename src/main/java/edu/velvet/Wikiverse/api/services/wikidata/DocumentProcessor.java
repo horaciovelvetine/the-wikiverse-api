@@ -1,13 +1,11 @@
 package edu.velvet.Wikiverse.api.services.wikidata;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
-import org.wikidata.wdtk.datamodel.interfaces.Statement;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
 import edu.velvet.Wikiverse.api.models.core.SearchResult;
@@ -84,61 +82,63 @@ public class DocumentProcessor {
 	 */
 	public List<SearchResult> ingestWikidataSearchResults(List<WbSearchEntitiesResult> results) {
 		return logger
-			.log(SOURCE + ".ingestWikidataSearchResults()", results)
-			.stream()
-			.map(result -> new SearchResult(result))
-			.collect(Collectors.toList());
+				.log(SOURCE + ".ingestWikidataSearchResults()", results)
+				.stream()
+				.map(result -> new SearchResult(result))
+				.collect(Collectors.toList());
 	}
 
 	public void ingestInitialGraphsetDocument(
-		EntityDocument doc,
-		GraphsetRequest request,
-		DefaultWikidataFilters filters
-	) {
+			EntityDocument doc,
+			GraphsetRequest request,
+			DefaultWikidataFilters filters) {
 		logger.log(SOURCE + ".ingestInitialGraphsetDocument(" + doc.getEntityId().getId() + ")", doc);
 
 		if (doc instanceof ItemDocumentImpl itemDoc) {
 			// ? create the origin from the result
 			Vertex origin = new Vertex(itemDoc, request.getMetadata().getWikiLangTarget());
 			request.getGraphset().addVertex(origin);
-
-			// ? Iterate over the statements...
-			Iterator<Statement> statements = itemDoc.getAllStatements();
-			while (statements.hasNext()) {
-				Statement statement = statements.next();
-				WikidataSnak mainSnak = statement.getMainSnak().accept(new WikidataSnak());
-
-				// ? check if this snak is something we don't want in our set...
-
-				//? Check if the mainSnak is incomplete data
-				if (mainSnak.isNull()) {
-					//skip this
-					continue;
-				}
-
-				// ? Check if the value for the snak is null
-				if (mainSnak.getValue().isNull()) {
-					// skip this
-					continue;
-				}
-
-				// ? Check if excluded datatype
-				if (filters.isFilteredDataType(mainSnak.getDatatype())) {
-					// skip this
-					continue;
-				}
-
-				// ? Check if the value of this snak is a filtered EntID
-				if (filters.isFilteredWikidataID(mainSnak.getValue().getValue())) {
-					// skip this
-					continue;
-				}
-
-				// we like this keep it
-				System.out.println("Keep this");
-			}
 		}
 	}
 
-	public void createUnfetchedEntitiesFromStatements(ItemDocumentImpl doc, GraphsetRequest request) {}
+	// public void createUnfetchedEntitiesFromStatements(
+	// ItemDocumentImpl doc,
+	// GraphsetRequest request,
+	// DefaultWikidataFilters filters
+	// ) {
+	// Iterator<Statement> statements = doc.getAllStatements();
+	// while (statements.hasNext()) {
+	// Statement statement = statements.next();
+	// WikidataSnak mainSnak = statement.getMainSnak().accept(new WikidataSnak());
+
+	// // ? check if this snak is something we don't want in our set...
+
+	// // ? Check if the mainSnak is incomplete data
+	// if (mainSnak.isNull()) {
+	// // skip this
+	// continue;
+	// }
+
+	// // ? Check if the value for the snak is null
+	// if (mainSnak.getValue().isNull()) {
+	// // skip this
+	// continue;
+	// }
+
+	// // ? Check if excluded datatype
+	// if (filters.isFilteredDataType(mainSnak.getDatatype())) {
+	// // skip this
+	// continue;
+	// }
+
+	// // ? Check if the value of this snak is a filtered EntID
+	// if (filters.isFilteredWikidataID(mainSnak.getValue().getValue())) {
+	// // skip this
+	// continue;
+	// }
+
+	// // we like this keep it
+	// System.out.println("Keep this");
+	// }
+	// }
 }

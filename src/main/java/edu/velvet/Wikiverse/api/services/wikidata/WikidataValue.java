@@ -130,7 +130,8 @@ public class WikidataValue implements ValueVisitor<WikidataValue> {
 	 */
 	@Override
 	public WikidataValue visit(EntityIdValue value) {
-		if (value == null) return nullWikidataValue();
+		if (value == null)
+			return nullWikidataValue();
 
 		this.value = value.getId() != null ? value.getId() : "";
 		this.context = value.getSiteIri() != null ? value.getSiteIri() : "";
@@ -148,21 +149,10 @@ public class WikidataValue implements ValueVisitor<WikidataValue> {
 	 */
 	@Override
 	public WikidataValue visit(TimeValue value) {
-		if (value == null) return nullWikidataValue();
+		if (value == null)
+			return nullWikidataValue();
 
-		this.value =
-			value.getYear() +
-			"-" +
-			value.getMonth() +
-			"-" +
-			value.getDay() +
-			" (" +
-			value.getHour() +
-			":" +
-			value.getMinute() +
-			":" +
-			value.getSecond() +
-			")";
+		this.value = formatTimeValue(value);
 		this.context = value.getPreferredCalendarModel() != null ? value.getPreferredCalendarModel() : "";
 		this.type = ValueType.DATE_TIME;
 
@@ -178,7 +168,8 @@ public class WikidataValue implements ValueVisitor<WikidataValue> {
 	 */
 	@Override
 	public WikidataValue visit(StringValue value) {
-		if (value == null) return nullWikidataValue();
+		if (value == null)
+			return nullWikidataValue();
 
 		this.value = value.getString() != null ? value.getString() : "";
 		this.context = "";
@@ -195,12 +186,13 @@ public class WikidataValue implements ValueVisitor<WikidataValue> {
 	 */
 	@Override
 	public WikidataValue visit(QuantityValue value) {
-		if (value == null) return nullWikidataValue();
+		if (value == null)
+			return nullWikidataValue();
 
 		this.value = value.toString() != null ? value.toString() : "";
 		this.context = value.getUnitItemId() != null && value.getUnitItemId().getIri() != null
-			? value.getUnitItemId().getIri()
-			: "";
+				? value.getUnitItemId().getIri()
+				: "";
 		this.type = ValueType.QUANTITY;
 		return this;
 	}
@@ -214,7 +206,8 @@ public class WikidataValue implements ValueVisitor<WikidataValue> {
 	 */
 	@Override
 	public WikidataValue visit(MonolingualTextValue value) {
-		if (value == null) return nullWikidataValue();
+		if (value == null)
+			return nullWikidataValue();
 
 		this.value = value.getText() != null ? value.getText() : "";
 		this.context = value.getLanguageCode() != null ? value.getLanguageCode() : "";
@@ -257,6 +250,34 @@ public class WikidataValue implements ValueVisitor<WikidataValue> {
 		this.context = null;
 		this.type = ValueType.NULL;
 		return this;
+	}
+
+	/**
+	 * Formats a {@link TimeValue} object into a human-readable string
+	 * representation.
+	 * <p>
+	 * The format is: {@code yyyy-MM-dd (hh:mm:ss)}, where each component is taken
+	 * from the corresponding field in the {@code TimeValue} object.
+	 * <p>
+	 * Example: {@code 2024-06-01 (12:30:45)}
+	 *
+	 * @param value the {@link TimeValue} to format; must not be null
+	 * @return a string representation of the time value in the format
+	 *         {@code yyyy-MM-dd (hh:mm:ss)}
+	 */
+	private String formatTimeValue(TimeValue value) {
+		return (value.getYear() +
+				"-" +
+				value.getMonth() +
+				"-" +
+				value.getDay() +
+				" (" +
+				value.getHour() +
+				":" +
+				value.getMinute() +
+				":" +
+				value.getSecond() +
+				")");
 	}
 
 	/**

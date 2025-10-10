@@ -48,11 +48,10 @@ class WikiverseErrorTest {
 	void errorCategoryEnumShouldHaveAllExpectedValues() {
 		WikiverseError.ErrorCategory[] categories = WikiverseError.ErrorCategory.values();
 
-		assertEquals(9, categories.length);
+		assertEquals(8, categories.length);
 		assertTrue(List.of(categories).contains(WikiverseError.ErrorCategory.NETWORK));
 		assertTrue(List.of(categories).contains(WikiverseError.ErrorCategory.VALIDATION));
 		assertTrue(List.of(categories).contains(WikiverseError.ErrorCategory.PROCESSING));
-		assertTrue(List.of(categories).contains(WikiverseError.ErrorCategory.AUTHENTICATION));
 		assertTrue(List.of(categories).contains(WikiverseError.ErrorCategory.CONFIGURATION));
 		assertTrue(List.of(categories).contains(WikiverseError.ErrorCategory.EXTERNAL_SERVICE));
 		assertTrue(List.of(categories).contains(WikiverseError.ErrorCategory.INTERNAL_LOGIC));

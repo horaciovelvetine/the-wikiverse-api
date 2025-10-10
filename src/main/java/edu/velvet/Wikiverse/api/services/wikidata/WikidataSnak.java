@@ -116,7 +116,7 @@ public class WikidataSnak implements SnakVisitor<WikidataSnak> {
 			return this;
 
 		this.property = getPropertyValue(snak);
-		this.value = snak.getValue().accept(new WikidataValue());
+		this.value = getValue(snak);
 		// type narrow and check for the special datatype attribute... to help filter
 		// out irrelevant data
 		if (snak instanceof ValueSnakImpl impl) {
@@ -166,6 +166,22 @@ public class WikidataSnak implements SnakVisitor<WikidataSnak> {
 	 */
 	private WikidataValue getPropertyValue(Snak snak) {
 		return snak.getPropertyId().accept(new WikidataValue());
+	}
+
+	/**
+	 * Extracts the value from a {@link ValueSnak} by accepting a
+	 * {@link WikidataValue} visitor.
+	 * <p>
+	 * This method retrieves the value component of the given {@code ValueSnak} and
+	 * processes it
+	 * using the {@link WikidataValue} visitor to convert it into a unified value
+	 * representation.
+	 *
+	 * @param snak the {@link ValueSnak} from which to extract the value
+	 * @return the {@link WikidataValue} representation of the snak's value
+	 */
+	private WikidataValue getValue(ValueSnak snak) {
+		return snak.getValue().accept(new WikidataValue());
 	}
 
 	/**

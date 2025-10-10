@@ -14,11 +14,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * This class provides configuration for various aspects of graph layout
  * including:
  * <ul>
- * <li>Force-directed algorithm parameters (attraction, repulsion,
- * adjustments)</li>
- * <li>Layout convergence controls (iterations, movement limits,
- * temperature)</li>
- * <li>Vertex positioning and density settings</li>
+ * <li>Settings related to the layout preferences set by the user</li>
  * <li>Wikipedia language and origin vertex specifications</li>
  * </ul>
  *
@@ -36,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @version 1.0
  * @since 1.0
  * @see Vertex
+ * @see LayoutSettings
  * @see Point3D
  */
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -46,32 +43,14 @@ public class Metadata {
 	@JsonIgnore
 	private Vertex origin;
 
-	private Number attractionMultiplier;
-
-	private Number repulsionMultiplier;
-
-	private final Number[] forceAdjustmentMultipliers;
-
-	private final Number vertexDensity;
-
-	private final Number maxLayoutIterations;
-
-	private final Number maxIterationMovement;
-
-	private final Number temperatureCurveMultiplier;
+	private final LayoutSettings layoutSettings;
 
 	private String wikiLangTarget = "en";
 
 	public Metadata(String origindID, String wikiLangTarget) {
 		this.originID = origindID;
 		this.wikiLangTarget = wikiLangTarget;
-		this.attractionMultiplier = 0.5;
-		this.repulsionMultiplier = 0.5;
-		this.forceAdjustmentMultipliers = new Number[] { 0.9, 1.1 };
-		this.vertexDensity = 0.5;
-		this.maxIterationMovement = 30;
-		this.maxLayoutIterations = 250;
-		this.temperatureCurveMultiplier = 30;
+		this.layoutSettings = new LayoutSettings();
 	}
 
 	/**
@@ -111,109 +90,6 @@ public class Metadata {
 	}
 
 	/**
-	 * Gets the attraction multiplier used in force-directed layout algorithms.
-	 * Higher values increase the attractive force between connected vertices,
-	 * causing them to be drawn closer together in the final layout.
-	 *
-	 * @return the attraction multiplier
-	 */
-	public Number getAttractionMultiplier() {
-		return attractionMultiplier;
-	}
-
-	/**
-	 * Sets the attraction multiplier for force-directed layout algorithms.
-	 * Higher values increase the attractive force between connected vertices,
-	 * causing them to be drawn closer together in the final layout.
-	 *
-	 * @param attractionMultiplier the attraction multiplier
-	 */
-	public void setAttractionMultiplier(Number attractionMultiplier) {
-		this.attractionMultiplier = attractionMultiplier;
-	}
-
-	/**
-	 * Gets the repulsion multiplier used in force-directed layout algorithms.
-	 * Higher values increase the repulsive force between all vertices,
-	 * causing them to spread apart and avoid overlapping.
-	 *
-	 * @return the repulsion multiplier
-	 */
-	public Number getRepulsionMultiplier() {
-		return repulsionMultiplier;
-	}
-
-	/**
-	 * Sets the repulsion multiplier for force-directed layout algorithms.
-	 * Higher values increase the repulsive force between all vertices,
-	 * causing them to spread apart and avoid overlapping.
-	 *
-	 * @param repulsionMultiplier the repulsion multiplier
-	 */
-	public void setRepulsionMultiplier(Number repulsionMultiplier) {
-		this.repulsionMultiplier = repulsionMultiplier;
-	}
-
-	/**
-	 * Gets the force adjustment multipliers used to fine-tune the layout algorithm.
-	 * These multipliers are applied during different phases of the layout process
-	 * to control the convergence behavior and stability of the algorithm.
-	 *
-	 * @return array of force adjustment multipliers
-	 */
-	public Number[] getForceAdjustmentMultipliers() {
-		return forceAdjustmentMultipliers;
-	}
-
-	/**
-	 * Gets the vertex density parameter that controls how tightly packed vertices
-	 * are.
-	 * Higher values result in more compact layouts with vertices positioned closer
-	 * together,
-	 * while lower values create more spread-out layouts.
-	 *
-	 * @return the vertex density
-	 */
-	public Number getVertexDensity() {
-		return vertexDensity;
-	}
-
-	/**
-	 * Gets the maximum number of layout iterations the algorithm will perform.
-	 * More iterations generally lead to better convergence and more stable layouts
-	 * but require longer computation time.
-	 *
-	 * @return the maximum layout iterations
-	 */
-	public Number getMaxLayoutIterations() {
-		return maxLayoutIterations;
-	}
-
-	/**
-	 * Gets the maximum movement allowed per iteration during layout calculation.
-	 * This parameter helps prevent vertices from moving too far in a single step,
-	 * ensuring stable convergence of the layout algorithm.
-	 *
-	 * @return the maximum iteration movement
-	 */
-	public Number getMaxIterationMovement() {
-		return maxIterationMovement;
-	}
-
-	/**
-	 * Gets the temperature curve multiplier used in simulated annealing layout
-	 * algorithms.
-	 * This parameter controls how quickly the "temperature" decreases during the
-	 * layout process,
-	 * affecting the balance between exploration and exploitation in the algorithm.
-	 *
-	 * @return the temperature curve multiplier
-	 */
-	public Number getTemperatureCurveMultiplier() {
-		return temperatureCurveMultiplier;
-	}
-
-	/**
 	 * Gets the target Wikipedia language for the graph layout.
 	 *
 	 * @return the wiki language target (e.g., "en"), or null if not set
@@ -229,5 +105,9 @@ public class Metadata {
 	 */
 	public void setWikiLangTarget(String wikiLanguageTarget) {
 		this.wikiLangTarget = wikiLanguageTarget;
+	}
+
+	public LayoutSettings getLayoutSettings() {
+		return this.layoutSettings;
 	}
 }

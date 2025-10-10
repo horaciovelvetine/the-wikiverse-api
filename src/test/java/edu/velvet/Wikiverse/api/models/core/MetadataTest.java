@@ -41,20 +41,32 @@ class MetadataTest {
   }
 
   @Test
+  @DisplayName("Should return layout settings instance")
+  void shouldReturnLayoutSettingsInstance() {
+    LayoutSettings layoutSettings = metadata.getLayoutSettings();
+    assertNotNull(layoutSettings);
+    assertSame(layoutSettings, metadata.getLayoutSettings()); // Should return same instance
+  }
+
+  @Test
   @DisplayName("Should initialize with default values")
   void shouldInitializeWithDefaultValues() {
-    assertEquals(0.5, metadata.getAttractionMultiplier());
-    assertEquals(0.5, metadata.getRepulsionMultiplier());
-    assertEquals(0.5, metadata.getVertexDensity());
-    assertEquals(250, metadata.getMaxLayoutIterations());
-    assertEquals(30, metadata.getMaxIterationMovement());
-    assertEquals(30, metadata.getTemperatureCurveMultiplier());
+    LayoutSettings layoutSettings = metadata.getLayoutSettings();
+    assertNotNull(layoutSettings);
+    assertEquals(0.5, layoutSettings.getAttractionMultiplier());
+    assertEquals(0.5, layoutSettings.getRepulsionMultiplier());
+    assertEquals(0.5, layoutSettings.getVertexDensity());
+    assertEquals(250, layoutSettings.getMaxLayoutIterations());
+    assertEquals(30, layoutSettings.getMaxIterationMovement());
+    assertEquals(30, layoutSettings.getTemperatureCurveMultiplier());
+    assertEquals(true, layoutSettings.isPrefers3D());
   }
 
   @Test
   @DisplayName("Should initialize force adjustment multipliers array")
   void shouldInitializeForceAdjustmentMultipliersArray() {
-    Number[] multipliers = metadata.getForceAdjustmentMultipliers();
+    LayoutSettings layoutSettings = metadata.getLayoutSettings();
+    Number[] multipliers = layoutSettings.getForceAdjustmentMultipliers();
     assertNotNull(multipliers);
     assertEquals(2, multipliers.length);
     assertEquals(0.9, multipliers[0]);
@@ -94,41 +106,46 @@ class MetadataTest {
   @DisplayName("Should set and get attraction multiplier successfully")
   void shouldSetAndGetAttractionMultiplierSuccessfully() {
     Number newMultiplier = 0.8;
-    metadata.setAttractionMultiplier(newMultiplier);
-    assertEquals(newMultiplier, metadata.getAttractionMultiplier());
+    LayoutSettings layoutSettings = metadata.getLayoutSettings();
+    layoutSettings.setAttractionMultiplier(newMultiplier);
+    assertEquals(newMultiplier, layoutSettings.getAttractionMultiplier());
   }
 
   @Test
   @DisplayName("Should set and get repulsion multiplier successfully")
   void shouldSetAndGetRepulsionMultiplierSuccessfully() {
     Number newMultiplier = 0.7;
-    metadata.setRepulsionMultiplier(newMultiplier);
-    assertEquals(newMultiplier, metadata.getRepulsionMultiplier());
+    LayoutSettings layoutSettings = metadata.getLayoutSettings();
+    layoutSettings.setRepulsionMultiplier(newMultiplier);
+    assertEquals(newMultiplier, layoutSettings.getRepulsionMultiplier());
   }
 
   @Test
   @DisplayName("Should handle different number types for multipliers")
   void shouldHandleDifferentNumberTypesForMultipliers() {
+    LayoutSettings layoutSettings = metadata.getLayoutSettings();
+
     // Test with Integer
-    metadata.setAttractionMultiplier(1);
-    assertEquals(1, metadata.getAttractionMultiplier());
+    layoutSettings.setAttractionMultiplier(1);
+    assertEquals(1, layoutSettings.getAttractionMultiplier());
 
     // Test with Double
-    metadata.setRepulsionMultiplier(2.5);
-    assertEquals(2.5, metadata.getRepulsionMultiplier());
+    layoutSettings.setRepulsionMultiplier(2.5);
+    assertEquals(2.5, layoutSettings.getRepulsionMultiplier());
 
     // Test with Float
-    metadata.setAttractionMultiplier(3.14f);
-    assertEquals(3.14f, metadata.getAttractionMultiplier());
+    layoutSettings.setAttractionMultiplier(3.14f);
+    assertEquals(3.14f, layoutSettings.getAttractionMultiplier());
   }
 
   @Test
   @DisplayName("Should allow null multipliers")
   void shouldAllowNullMultipliers() {
-    metadata.setAttractionMultiplier(null);
-    metadata.setRepulsionMultiplier(null);
-    assertNull(metadata.getAttractionMultiplier());
-    assertNull(metadata.getRepulsionMultiplier());
+    LayoutSettings layoutSettings = metadata.getLayoutSettings();
+    layoutSettings.setAttractionMultiplier(null);
+    layoutSettings.setRepulsionMultiplier(null);
+    assertNull(layoutSettings.getAttractionMultiplier());
+    assertNull(layoutSettings.getRepulsionMultiplier());
   }
 
   @Test
@@ -160,8 +177,9 @@ class MetadataTest {
   @Test
   @DisplayName("Should maintain force adjustment multipliers immutability")
   void shouldMaintainForceAdjustmentMultipliersImmutability() {
-    Number[] originalMultipliers = metadata.getForceAdjustmentMultipliers();
-    Number[] retrievedMultipliers = metadata.getForceAdjustmentMultipliers();
+    LayoutSettings layoutSettings = metadata.getLayoutSettings();
+    Number[] originalMultipliers = layoutSettings.getForceAdjustmentMultipliers();
+    Number[] retrievedMultipliers = layoutSettings.getForceAdjustmentMultipliers();
 
     // Should be the same array reference
     assertSame(originalMultipliers, retrievedMultipliers);
@@ -174,23 +192,25 @@ class MetadataTest {
   @Test
   @DisplayName("Should handle edge cases for numeric values")
   void shouldHandleEdgeCasesForNumericValues() {
+    LayoutSettings layoutSettings = metadata.getLayoutSettings();
+
     // Test with very small values
-    metadata.setAttractionMultiplier(0.001);
-    metadata.setRepulsionMultiplier(0.0001);
-    assertEquals(0.001, metadata.getAttractionMultiplier());
-    assertEquals(0.0001, metadata.getRepulsionMultiplier());
+    layoutSettings.setAttractionMultiplier(0.001);
+    layoutSettings.setRepulsionMultiplier(0.0001);
+    assertEquals(0.001, layoutSettings.getAttractionMultiplier());
+    assertEquals(0.0001, layoutSettings.getRepulsionMultiplier());
 
     // Test with large values
-    metadata.setAttractionMultiplier(1000.0);
-    metadata.setRepulsionMultiplier(999.99);
-    assertEquals(1000.0, metadata.getAttractionMultiplier());
-    assertEquals(999.99, metadata.getRepulsionMultiplier());
+    layoutSettings.setAttractionMultiplier(1000.0);
+    layoutSettings.setRepulsionMultiplier(999.99);
+    assertEquals(1000.0, layoutSettings.getAttractionMultiplier());
+    assertEquals(999.99, layoutSettings.getRepulsionMultiplier());
 
     // Test with negative values
-    metadata.setAttractionMultiplier(-0.5);
-    metadata.setRepulsionMultiplier(-1.0);
-    assertEquals(-0.5, metadata.getAttractionMultiplier());
-    assertEquals(-1.0, metadata.getRepulsionMultiplier());
+    layoutSettings.setAttractionMultiplier(-0.5);
+    layoutSettings.setRepulsionMultiplier(-1.0);
+    assertEquals(-0.5, layoutSettings.getAttractionMultiplier());
+    assertEquals(-1.0, layoutSettings.getRepulsionMultiplier());
   }
 
   @Test
@@ -199,22 +219,24 @@ class MetadataTest {
     // Set all mutable properties
     metadata.setOriginID("Q789");
     metadata.setOrigin(testOrigin);
-    metadata.setAttractionMultiplier(0.75);
-    metadata.setRepulsionMultiplier(0.25);
     metadata.setWikiLangTarget("de");
+
+    LayoutSettings layoutSettings = metadata.getLayoutSettings();
+    layoutSettings.setAttractionMultiplier(0.75);
+    layoutSettings.setRepulsionMultiplier(0.25);
 
     // Verify all properties
     assertEquals("Q789", metadata.getOriginID());
     assertEquals(testOrigin, metadata.getOrigin());
-    assertEquals(0.75, metadata.getAttractionMultiplier());
-    assertEquals(0.25, metadata.getRepulsionMultiplier());
     assertEquals("de", metadata.getWikiLangTarget());
+    assertEquals(0.75, layoutSettings.getAttractionMultiplier());
+    assertEquals(0.25, layoutSettings.getRepulsionMultiplier());
 
     // Verify immutable properties remain unchanged
-    assertEquals(0.5, metadata.getVertexDensity());
-    assertEquals(250, metadata.getMaxLayoutIterations());
-    assertEquals(30, metadata.getMaxIterationMovement());
-    assertEquals(30, metadata.getTemperatureCurveMultiplier());
+    assertEquals(0.5, layoutSettings.getVertexDensity());
+    assertEquals(250, layoutSettings.getMaxLayoutIterations());
+    assertEquals(30, layoutSettings.getMaxIterationMovement());
+    assertEquals(30, layoutSettings.getTemperatureCurveMultiplier());
   }
 
   @Test
@@ -224,13 +246,15 @@ class MetadataTest {
     Metadata metadata2 = new Metadata("Q2", "fr");
 
     // Configure differently
-    metadata1.setAttractionMultiplier(0.8);
-    metadata2.setAttractionMultiplier(0.3);
+    LayoutSettings layoutSettings1 = metadata1.getLayoutSettings();
+    LayoutSettings layoutSettings2 = metadata2.getLayoutSettings();
+    layoutSettings1.setAttractionMultiplier(0.8);
+    layoutSettings2.setAttractionMultiplier(0.3);
 
     // Verify independence
-    assertEquals(0.8, metadata1.getAttractionMultiplier());
-    assertEquals(0.3, metadata2.getAttractionMultiplier());
-    assertNotEquals(metadata1.getAttractionMultiplier(), metadata2.getAttractionMultiplier());
+    assertEquals(0.8, layoutSettings1.getAttractionMultiplier());
+    assertEquals(0.3, layoutSettings2.getAttractionMultiplier());
+    assertNotEquals(layoutSettings1.getAttractionMultiplier(), layoutSettings2.getAttractionMultiplier());
 
     assertEquals("Q1", metadata1.getOriginID());
     assertEquals("Q2", metadata2.getOriginID());
@@ -270,29 +294,31 @@ class MetadataTest {
   @Test
   @DisplayName("Should maintain state consistency after multiple operations")
   void shouldMaintainStateConsistencyAfterMultipleOperations() {
+    LayoutSettings layoutSettings = metadata.getLayoutSettings();
+
     // Initial state
     assertEquals("Q123", metadata.getOriginID());
     assertEquals("en", metadata.getWikiLangTarget());
-    assertEquals(0.5, metadata.getAttractionMultiplier());
+    assertEquals(0.5, layoutSettings.getAttractionMultiplier());
 
     // Multiple updates
     metadata.setOriginID("Q456");
     metadata.setWikiLangTarget("fr");
-    metadata.setAttractionMultiplier(0.8);
+    layoutSettings.setAttractionMultiplier(0.8);
 
     // Verify state
     assertEquals("Q456", metadata.getOriginID());
     assertEquals("fr", metadata.getWikiLangTarget());
-    assertEquals(0.8, metadata.getAttractionMultiplier());
+    assertEquals(0.8, layoutSettings.getAttractionMultiplier());
 
     // More updates
     metadata.setOriginID("Q789");
     metadata.setWikiLangTarget("de");
-    metadata.setAttractionMultiplier(0.2);
+    layoutSettings.setAttractionMultiplier(0.2);
 
     // Verify final state
     assertEquals("Q789", metadata.getOriginID());
     assertEquals("de", metadata.getWikiLangTarget());
-    assertEquals(0.2, metadata.getAttractionMultiplier());
+    assertEquals(0.2, layoutSettings.getAttractionMultiplier());
   }
 }
