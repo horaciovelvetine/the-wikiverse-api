@@ -1,16 +1,17 @@
 package edu.velvet.Wikiverse.api.controllers;
 
-import edu.velvet.Wikiverse.api.models.requests.GraphsetRequest;
-import edu.velvet.Wikiverse.api.models.requests.Request;
-import edu.velvet.Wikiverse.api.models.requests.SearchRequest;
-import edu.velvet.Wikiverse.api.models.requests.StatusRequest;
-import edu.velvet.Wikiverse.api.services.wikidata.WikidataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import edu.velvet.Wikiverse.api.models.requests.GraphsetRequest;
+import edu.velvet.Wikiverse.api.models.requests.Request;
+import edu.velvet.Wikiverse.api.models.requests.SearchRequest;
+import edu.velvet.Wikiverse.api.models.requests.StatusRequest;
+import edu.velvet.Wikiverse.api.services.wikidata.WikidataService;
 
 @CrossOrigin
 @RestController
@@ -122,9 +123,9 @@ public class WikiverseRequestsController {
 	 */
 	@GetMapping("api/graphset/initialize")
 	public ResponseEntity<Request> getInitializedGraphset(
-		@RequestParam String targetID,
-		@RequestParam String wikiLangTarget
-	) {
+			@RequestParam String targetID,
+			@RequestParam String wikiLangTarget,
+			@RequestParam String prefers3D) {
 		return buildRequestResponse(new GraphsetRequest(targetID, wikiLangTarget).initializeGraphset(wikidata));
 	}
 
@@ -164,7 +165,7 @@ public class WikiverseRequestsController {
 	 */
 	private ResponseEntity<Request> buildRequestResponse(Request request) {
 		return request.markCompleted().errored()
-			? ResponseEntity.status(request.getError().httpStatusCode()).body(request)
-			: ResponseEntity.status(200).body(request);
+				? ResponseEntity.status(request.getError().httpStatusCode()).body(request)
+				: ResponseEntity.status(200).body(request);
 	}
 }

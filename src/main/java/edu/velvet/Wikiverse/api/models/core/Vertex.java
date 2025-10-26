@@ -1,7 +1,11 @@
 package edu.velvet.Wikiverse.api.models.core;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 /**
  * Represents a vertex (node) in the Wikiverse graph structure.
@@ -49,7 +53,10 @@ public class Vertex {
 	/** Flag indicating whether this vertex is locked from modifications. */
 	private boolean locked = false;
 
-	public Vertex() {}
+	private final List<Claim> claims = new ArrayList<>();
+
+	public Vertex() {
+	}
 
 	public Vertex(ItemDocumentImpl doc, String wikiLangTarget) {
 		this.id = doc.getEntityId().getId();
@@ -164,6 +171,25 @@ public class Vertex {
 	}
 
 	/**
+	 * Returns the list of claims associated with this vertex.
+	 *
+	 * @return a list of {@link Claim} objects; never null but may be empty
+	 */
+	public List<Claim> getClaims() {
+		return this.claims;
+	}
+
+	/**
+	 * Adds a claim to this vertex.
+	 *
+	 * @param claim the {@link Claim} to add; cannot be null
+	 * @throws NullPointerException if claim is null
+	 */
+	public void addClaim(Claim claim) {
+		this.claims.add(claim);
+	}
+
+	/**
 	 * Checks if this vertex is locked from modifications.
 	 *
 	 * @return true if the vertex is locked, false otherwise
@@ -224,10 +250,9 @@ public class Vertex {
 		// Check if position is not at origin (0,0,0)
 		// Using a small epsilon for floating-point comparison
 		final double EPSILON = 1e-9;
-		boolean isAtOrigin =
-			Math.abs(position.getX()) < EPSILON &&
-			Math.abs(position.getY()) < EPSILON &&
-			Math.abs(position.getZ()) < EPSILON;
+		boolean isAtOrigin = Math.abs(position.getX()) < EPSILON &&
+				Math.abs(position.getY()) < EPSILON &&
+				Math.abs(position.getZ()) < EPSILON;
 
 		return !isAtOrigin;
 	}

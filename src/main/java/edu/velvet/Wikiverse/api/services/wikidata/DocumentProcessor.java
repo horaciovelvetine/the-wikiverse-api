@@ -1,13 +1,23 @@
 package edu.velvet.Wikiverse.api.services.wikidata;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
+import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
+import org.wikidata.wdtk.datamodel.interfaces.Reference;
+import org.wikidata.wdtk.datamodel.interfaces.SiteLink;
+import org.wikidata.wdtk.datamodel.interfaces.SnakGroup;
+import org.wikidata.wdtk.datamodel.interfaces.Statement;
+import org.wikidata.wdtk.datamodel.interfaces.StatementDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
 
+import edu.velvet.Wikiverse.api.models.core.Claim;
 import edu.velvet.Wikiverse.api.models.core.SearchResult;
 import edu.velvet.Wikiverse.api.models.core.Vertex;
 import edu.velvet.Wikiverse.api.models.requests.GraphsetRequest;
@@ -90,55 +100,85 @@ public class DocumentProcessor {
 
 	public void ingestInitialGraphsetDocument(
 			EntityDocument doc,
-			GraphsetRequest request,
-			DefaultWikidataFilters filters) {
+			GraphsetRequest request) {
 		logger.log(SOURCE + ".ingestInitialGraphsetDocument(" + doc.getEntityId().getId() + ")", doc);
 
-		if (doc instanceof ItemDocumentImpl itemDoc) {
-			// ? create the origin from the result
-			Vertex origin = new Vertex(itemDoc, request.getMetadata().getWikiLangTarget());
-			request.getGraphset().addVertex(origin);
+		Vertex origin = new Vertex();
+
+		String lang = request.getMetadata().getWikiLangTarget();
+		if (doc instanceof ItemDocument iDoc) {
+			origin.setId(doc.getEntityId().getId());
+			origin.setDescription(iDoc.findDescription(lang));
+			origin.setLabel(iDoc.findLabel(lang));
+			Map<String, SiteLink> links = iDoc.getSiteLinks();
+			SiteLink link = links.get(lang + "wiki");
+			String pageTitle = link.getPageTitle();
+			pageTitle = pageTitle.replace(" ", "_").replace("%3A", ":").replace("%2F", "/");
+			String encodedTitle;
+			try {
+				encodedTitle = URLEncoder.encode(pageTitle, "utf-8");
+			} catch (UnsupportedEncodingException e) {
+				throw new RuntimeException("UTF-8 Encoding is not supported in this RunTime", e);
+			}
+			String PROTOCOL = "https://";
+			String SITE_MAIN = ".wikipedia.org/wiki/";
+			origin.setUrl(PROTOCOL + lang + SITE_MAIN + encodedTitle);
 		}
+
+		// Statements
+		if (doc instanceof StatementDocument sDoc) {
+			Iterator<Statement> statements = sDoc.getAllStatements();
+			while (statements.hasNext()) {
+				// Set subject/establish claim
+				Claim claim = new Claim();
+
+				// Sets main Snak()
+				Statement statement = statements.next();
+				WikidataSnak main = statement.getMainSnak().accept(new WikidataSnak());
+				claim.setMain(main);
+
+				if (main.getDatatype() != null && main.getDatatype().equals("external-id")) {
+					// Ignore any external-id snaks... skip to next
+					continue;
+				}
+
+				if (main.getDatatype() != null && main.getDatatype().equals("monolingualtext")) {
+					// Ignore monolingual text restatements of properties...
+					continue;
+				}
+
+				if (main.getProperty() != null && main.getProperty().getValue().equals("P8687")) {
+					// Ignore social media followers, data is almost always very stale...
+					continue;
+				}
+
+				// Set Qualifiers
+				List<SnakGroup> qualifiers = statement.getQualifiers();
+				for (SnakGroup group : qualifiers) {
+					WikidataSnakGroup qualifier = new WikidataSnakGroup(group);
+					if (!qualifier.getSnaks().isEmpty()) {
+						claim.addQualifier(qualifier);
+					}
+				}
+
+				// Set References
+				List<Reference> references = statement.getReferences();
+				for (Reference reference : references) {
+					WikidataReference ref = new WikidataReference();
+					for (SnakGroup group : reference.getSnakGroups()) {
+						WikidataSnakGroup refData = new WikidataSnakGroup(group);
+						if (!refData.getSnaks().isEmpty()) {
+							ref.addSnakGroup(refData);
+						}
+					}
+					claim.addReference(ref);
+				}
+
+				// Add claim back to the initial Vertex
+				origin.addClaim(claim);
+			}
+		}
+
+		request.getGraphset().addVertex(origin);
 	}
-
-	// public void createUnfetchedEntitiesFromStatements(
-	// ItemDocumentImpl doc,
-	// GraphsetRequest request,
-	// DefaultWikidataFilters filters
-	// ) {
-	// Iterator<Statement> statements = doc.getAllStatements();
-	// while (statements.hasNext()) {
-	// Statement statement = statements.next();
-	// WikidataSnak mainSnak = statement.getMainSnak().accept(new WikidataSnak());
-
-	// // ? check if this snak is something we don't want in our set...
-
-	// // ? Check if the mainSnak is incomplete data
-	// if (mainSnak.isNull()) {
-	// // skip this
-	// continue;
-	// }
-
-	// // ? Check if the value for the snak is null
-	// if (mainSnak.getValue().isNull()) {
-	// // skip this
-	// continue;
-	// }
-
-	// // ? Check if excluded datatype
-	// if (filters.isFilteredDataType(mainSnak.getDatatype())) {
-	// // skip this
-	// continue;
-	// }
-
-	// // ? Check if the value of this snak is a filtered EntID
-	// if (filters.isFilteredWikidataID(mainSnak.getValue().getValue())) {
-	// // skip this
-	// continue;
-	// }
-
-	// // we like this keep it
-	// System.out.println("Keep this");
-	// }
-	// }
 }

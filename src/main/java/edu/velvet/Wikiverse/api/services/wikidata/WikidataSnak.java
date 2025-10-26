@@ -7,6 +7,8 @@ import org.wikidata.wdtk.datamodel.interfaces.SnakVisitor;
 import org.wikidata.wdtk.datamodel.interfaces.SomeValueSnak;
 import org.wikidata.wdtk.datamodel.interfaces.ValueSnak;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Represents a Wikidata Snak (statement) in the Wikiverse graph structure.
  * A Snak represents a property-value pair or property-only statement from
@@ -99,6 +101,7 @@ public class WikidataSnak implements SnakVisitor<WikidataSnak> {
 	 *
 	 * @return true if the Snak is null, false otherwise
 	 */
+	@JsonIgnore
 	public boolean isNull() {
 		return this.value == null || this.datatype == null || this.property == null;
 	}
@@ -112,8 +115,7 @@ public class WikidataSnak implements SnakVisitor<WikidataSnak> {
 	 */
 	@Override
 	public WikidataSnak visit(ValueSnak snak) {
-		if (snak == null)
-			return this;
+		if (snak == null) return this;
 
 		this.property = getPropertyValue(snak);
 		this.value = getValue(snak);
@@ -135,8 +137,7 @@ public class WikidataSnak implements SnakVisitor<WikidataSnak> {
 	 */
 	@Override
 	public WikidataSnak visit(SomeValueSnak snak) {
-		if (snak == null)
-			return this;
+		if (snak == null) return this;
 
 		this.property = getPropertyValue(snak);
 		return this;
@@ -151,8 +152,7 @@ public class WikidataSnak implements SnakVisitor<WikidataSnak> {
 	 */
 	@Override
 	public WikidataSnak visit(NoValueSnak snak) {
-		if (snak == null)
-			return this;
+		if (snak == null) return this;
 
 		this.property = getPropertyValue(snak);
 		return this;

@@ -2,6 +2,8 @@ package edu.velvet.Wikiverse.api.models.requests;
 
 import java.time.Instant;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import edu.velvet.Wikiverse.api.models.WikiverseError;
 
 /**
@@ -109,6 +111,7 @@ public class Request {
 	 *
 	 * @return true if both timestamps are set, false otherwise
 	 */
+	@JsonIgnore
 	public boolean isCompleted() {
 		return receivedAt != null && respondedAt != null;
 	}

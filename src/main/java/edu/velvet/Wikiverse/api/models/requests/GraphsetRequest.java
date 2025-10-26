@@ -1,15 +1,11 @@
 package edu.velvet.Wikiverse.api.models.requests;
 
-import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import edu.velvet.Wikiverse.api.models.WikiverseError;
 import edu.velvet.Wikiverse.api.models.core.Graphset;
 import edu.velvet.Wikiverse.api.models.core.Metadata;
 import edu.velvet.Wikiverse.api.services.wikidata.WikidataService;
-import io.vavr.control.Either;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class GraphsetRequest extends Request {
@@ -39,15 +35,19 @@ public class GraphsetRequest extends Request {
 
 	@JsonIgnore
 	public GraphsetRequest initializeGraphset(WikidataService wikidata) {
-		Either<WikiverseError, EntityDocument> initialFetch = wikidata
+		wikidata
 			.api()
-			.fetchEntityByID(this.metadata.getOriginID(), this.metadata.getWikiLangTarget());
-
-		if (initialFetch.isLeft()) {
-			this.setError(initialFetch.getLeft());
-		} else {
-			wikidata.docProc().ingestInitialGraphsetDocument(initialFetch.get(), this, wikidata.getDefaultFilter());
-		}
+			.fetchEntityByID(this.metadata.getOriginID(), this.metadata.getWikiLangTarget())
+			.fold(
+				wikiverseError -> {
+					this.setError(wikiverseError);
+					return null;
+				},
+				result -> {
+					wikidata.docProc().ingestInitialGraphsetDocument(result, this);
+					return null;
+				}
+			);
 		return this;
 	}
 }

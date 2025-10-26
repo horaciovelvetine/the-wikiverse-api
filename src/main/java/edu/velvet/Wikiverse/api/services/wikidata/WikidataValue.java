@@ -11,6 +11,8 @@ import org.wikidata.wdtk.datamodel.interfaces.UnsupportedValue;
 import org.wikidata.wdtk.datamodel.interfaces.Value;
 import org.wikidata.wdtk.datamodel.interfaces.ValueVisitor;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * Represents a value from Wikidata with its associated context and type
  * information.
@@ -115,6 +117,7 @@ public class WikidataValue implements ValueVisitor<WikidataValue> {
 	 *
 	 * @return true if the value type is NULL, false otherwise
 	 */
+	@JsonIgnore
 	public boolean isNull() {
 		return this.type == ValueType.NULL;
 	}
