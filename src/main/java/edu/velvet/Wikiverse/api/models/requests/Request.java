@@ -1,10 +1,8 @@
 package edu.velvet.Wikiverse.api.models.requests;
 
-import java.time.Instant;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import edu.velvet.Wikiverse.api.models.WikiverseError;
+import java.time.Instant;
 
 /**
  * Represents a request tracking object in the Wikiverse API system.
