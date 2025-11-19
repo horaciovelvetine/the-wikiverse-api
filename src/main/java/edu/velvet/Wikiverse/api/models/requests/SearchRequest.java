@@ -1,12 +1,10 @@
 package edu.velvet.Wikiverse.api.models.requests;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
-
 import edu.velvet.Wikiverse.api.models.core.SearchResult;
 import edu.velvet.Wikiverse.api.services.wikidata.WikidataService;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a search request for querying Wikidata entities with specific
@@ -43,38 +41,37 @@ import edu.velvet.Wikiverse.api.services.wikidata.WikidataService;
 public class SearchRequest extends Request {
 
 	/** The search query string used for searching Wikidata entities. */
-	private String query;
+	private final String query;
 
 	/** The target Wikipedia language code for search results (e.g., "en", "es"). */
-	private String wikiLangTarget;
+	private final String wikiLangTarget;
 
 	/** The list of search results returned from the Wikidata search operation. */
-	private List<SearchResult> searchResults;
+	private List<SearchResult> searchResults = new ArrayList<>();
 
 	/**
-	 * Constructs a new SearchRequest with the specified query and language target.
-	 *
+	 * Constructs a new {@code SearchRequest} and immediately executes the search
+	 * operation.
 	 * <p>
-	 * This constructor initializes a new search request with the provided search
-	 * parameters and creates an empty list for storing search results. The search
-	 * results list will be populated when the search operation is executed.
+	 * This constructor initializes the request with the provided search query and
+	 * language target,
+	 * then uses the supplied {@link WikidataService} instance to perform an API
+	 * search for matching entities.
+	 * The resulting search results are automatically fetched and stored in this
+	 * request instance.
 	 *
-	 * @param query          the search query string, cannot be null or empty
-	 * @param wikiLangTarget the target Wikipedia language code, cannot be null or
-	 *                       empty
-	 * @throws IllegalArgumentException if query or wikiLangTarget is null or empty
+	 * @param query          the search query string to use for Wikidata API search;
+	 *                       cannot be null or empty
+	 * @param wikiLangTarget the Wikipedia language code to target (e.g., "en",
+	 *                       "es"); cannot be null or empty
+	 * @param wikidata       the {@link WikidataService} instance used to perform
+	 *                       the search; must not be null
 	 */
-	public SearchRequest(String query, String wikiLangTarget) {
-		if (query == null || query.trim().isEmpty()) {
-			throw new IllegalArgumentException("Query cannot be null or empty");
-		}
-		if (wikiLangTarget == null || wikiLangTarget.trim().isEmpty()) {
-			throw new IllegalArgumentException("WikiLangTarget cannot be null or empty");
-		}
-
+	public SearchRequest(String query, String wikiLangTarget, WikidataService wikidata) {
 		this.query = query;
 		this.wikiLangTarget = wikiLangTarget;
-		this.searchResults = new ArrayList<>();
+		// Fetch and Ingest the Search Results from the Wikidata API
+		fetchSearchResults(wikidata);
 	}
 
 	/**
@@ -125,7 +122,7 @@ public class SearchRequest extends Request {
 	 * @see WikidataService#api()
 	 * @see edu.velvet.Wikiverse.api.services.wikidata.DocumentProcessor#ingestWikidataSearchResults(List)
 	 */
-	public SearchRequest fetchSearchResults(WikidataService wikidata) {
+	private void fetchSearchResults(WikidataService wikidata) {
 		wikidata
 			.api()
 			.fetchSearchResultsByAny(query, wikiLangTarget)
@@ -139,6 +136,5 @@ public class SearchRequest extends Request {
 					return null;
 				}
 			);
-		return this;
 	}
 }
