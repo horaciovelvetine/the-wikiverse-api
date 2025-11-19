@@ -1,18 +1,15 @@
 package edu.velvet.Wikiverse.api.services.wikidata;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.JsonNode;
+import edu.velvet.Wikiverse.api.services.logging.Mappable;
+import edu.velvet.Wikiverse.api.services.logging.ProcessLogger;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
 import org.springframework.core.io.ClassPathResource;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.JsonNode;
-
-import edu.velvet.Wikiverse.api.services.logging.Mappable;
-import edu.velvet.Wikiverse.api.services.logging.ProcessLogger;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class DefaultWikidataFilters implements Mappable {
