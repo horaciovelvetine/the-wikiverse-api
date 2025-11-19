@@ -1,5 +1,6 @@
 package edu.velvet.Wikiverse.api.services.wikidata;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.wikidata.wdtk.datamodel.interfaces.EntityIdValue;
 import org.wikidata.wdtk.datamodel.interfaces.GlobeCoordinatesValue;
 import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
@@ -10,8 +11,6 @@ import org.wikidata.wdtk.datamodel.interfaces.TimeValue;
 import org.wikidata.wdtk.datamodel.interfaces.UnsupportedValue;
 import org.wikidata.wdtk.datamodel.interfaces.Value;
 import org.wikidata.wdtk.datamodel.interfaces.ValueVisitor;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Represents a value from Wikidata with its associated context and type
@@ -69,6 +68,11 @@ public class WikidataValue implements ValueVisitor<WikidataValue> {
 	 * {@link Value} sub-interfaces.
 	 */
 	private ValueType type;
+
+	/**
+	 * Default constructor for JSON deserialization.
+	 */
+	public WikidataValue() {}
 
 	/**
 	 * All the possible (known) value subtypes from Wikidata.
@@ -133,8 +137,7 @@ public class WikidataValue implements ValueVisitor<WikidataValue> {
 	 */
 	@Override
 	public WikidataValue visit(EntityIdValue value) {
-		if (value == null)
-			return nullWikidataValue();
+		if (value == null) return nullWikidataValue();
 
 		this.value = value.getId() != null ? value.getId() : "";
 		this.context = value.getSiteIri() != null ? value.getSiteIri() : "";
@@ -152,8 +155,7 @@ public class WikidataValue implements ValueVisitor<WikidataValue> {
 	 */
 	@Override
 	public WikidataValue visit(TimeValue value) {
-		if (value == null)
-			return nullWikidataValue();
+		if (value == null) return nullWikidataValue();
 
 		this.value = formatTimeValue(value);
 		this.context = value.getPreferredCalendarModel() != null ? value.getPreferredCalendarModel() : "";
@@ -171,8 +173,7 @@ public class WikidataValue implements ValueVisitor<WikidataValue> {
 	 */
 	@Override
 	public WikidataValue visit(StringValue value) {
-		if (value == null)
-			return nullWikidataValue();
+		if (value == null) return nullWikidataValue();
 
 		this.value = value.getString() != null ? value.getString() : "";
 		this.context = "";
@@ -189,13 +190,12 @@ public class WikidataValue implements ValueVisitor<WikidataValue> {
 	 */
 	@Override
 	public WikidataValue visit(QuantityValue value) {
-		if (value == null)
-			return nullWikidataValue();
+		if (value == null) return nullWikidataValue();
 
 		this.value = value.toString() != null ? value.toString() : "";
 		this.context = value.getUnitItemId() != null && value.getUnitItemId().getIri() != null
-				? value.getUnitItemId().getIri()
-				: "";
+			? value.getUnitItemId().getIri()
+			: "";
 		this.type = ValueType.QUANTITY;
 		return this;
 	}
@@ -209,8 +209,7 @@ public class WikidataValue implements ValueVisitor<WikidataValue> {
 	 */
 	@Override
 	public WikidataValue visit(MonolingualTextValue value) {
-		if (value == null)
-			return nullWikidataValue();
+		if (value == null) return nullWikidataValue();
 
 		this.value = value.getText() != null ? value.getText() : "";
 		this.context = value.getLanguageCode() != null ? value.getLanguageCode() : "";
@@ -269,18 +268,20 @@ public class WikidataValue implements ValueVisitor<WikidataValue> {
 	 *         {@code yyyy-MM-dd (hh:mm:ss)}
 	 */
 	private String formatTimeValue(TimeValue value) {
-		return (value.getYear() +
-				"-" +
-				value.getMonth() +
-				"-" +
-				value.getDay() +
-				" (" +
-				value.getHour() +
-				":" +
-				value.getMinute() +
-				":" +
-				value.getSecond() +
-				")");
+		return (
+			value.getYear() +
+			"-" +
+			value.getMonth() +
+			"-" +
+			value.getDay() +
+			" (" +
+			value.getHour() +
+			":" +
+			value.getMinute() +
+			":" +
+			value.getSecond() +
+			")"
+		);
 	}
 
 	/**
