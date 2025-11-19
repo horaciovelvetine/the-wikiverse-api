@@ -2,7 +2,10 @@ package edu.velvet.Wikiverse.api.models.core;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.vavr.Tuple2;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,15 +39,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Graphset {
 
 	/** Collection of vertices (nodes) in this graphset. Thread-safe. */
-	private Set<Vertex> vertices = ConcurrentHashMap.newKeySet();
+	private final Set<Vertex> vertices = ConcurrentHashMap.newKeySet();
 
 	/**
 	 * Collection of properties (relationship types) in this graphset. Thread-safe.
 	 */
-	private Set<Property> properties = ConcurrentHashMap.newKeySet();
+	private final Set<Property> properties = ConcurrentHashMap.newKeySet();
 
 	/** Collection of edges (connections) in this graphset. Thread-safe. */
-	private Set<Edge> edges = ConcurrentHashMap.newKeySet();
+	private final Set<Edge> edges = ConcurrentHashMap.newKeySet();
 
 	/**
 	 * Gets the collection of vertices in this graphset.
@@ -53,19 +56,6 @@ public class Graphset {
 	 */
 	public Set<Vertex> getVertices() {
 		return vertices;
-	}
-
-	/**
-	 * Sets the collection of vertices for this graphset.
-	 *
-	 * @param vertices the set of vertices, cannot be null
-	 * @throws IllegalArgumentException if vertices is null
-	 */
-	public void setVertices(Set<Vertex> vertices) {
-		if (vertices == null) {
-			throw new IllegalArgumentException("Vertices cannot be null");
-		}
-		this.vertices = vertices;
 	}
 
 	/**
@@ -78,122 +68,12 @@ public class Graphset {
 	}
 
 	/**
-	 * Sets the collection of properties for this graphset.
-	 *
-	 * @param properties the set of properties, cannot be null
-	 * @throws IllegalArgumentException if properties is null
-	 */
-	public void setProperties(Set<Property> properties) {
-		if (properties == null) {
-			throw new IllegalArgumentException("Properties cannot be null");
-		}
-		this.properties = properties;
-	}
-
-	/**
 	 * Gets the collection of edges in this graphset.
 	 *
 	 * @return the set of edges, never null
 	 */
 	public Set<Edge> getEdges() {
 		return edges;
-	}
-
-	/**
-	 * Sets the collection of edges for this graphset.
-	 *
-	 * @param edges the set of edges, cannot be null
-	 * @throws IllegalArgumentException if edges is null
-	 */
-	public void setEdges(Set<Edge> edges) {
-		if (edges == null) {
-			throw new IllegalArgumentException("Edges cannot be null");
-		}
-		this.edges = edges;
-	}
-
-	/**
-	 * Adds a vertex to this graphset.
-	 *
-	 * @param vertex the vertex to add, cannot be null
-	 * @return true if the vertex was added (was not already present)
-	 * @throws IllegalArgumentException if vertex is null
-	 */
-	public boolean addVertex(Vertex vertex) {
-		if (vertex == null) {
-			throw new IllegalArgumentException("Vertex cannot be null");
-		}
-		return vertices.add(vertex);
-	}
-
-	/**
-	 * Removes a vertex from this graphset.
-	 *
-	 * @param vertex the vertex to remove, cannot be null
-	 * @return true if the vertex was removed (was present)
-	 * @throws IllegalArgumentException if vertex is null
-	 */
-	public boolean removeVertex(Vertex vertex) {
-		if (vertex == null) {
-			throw new IllegalArgumentException("Vertex cannot be null");
-		}
-		return vertices.remove(vertex);
-	}
-
-	/**
-	 * Adds a property to this graphset.
-	 *
-	 * @param property the property to add, cannot be null
-	 * @return true if the property was added (was not already present)
-	 * @throws IllegalArgumentException if property is null
-	 */
-	public boolean addProperty(Property property) {
-		if (property == null) {
-			throw new IllegalArgumentException("Property cannot be null");
-		}
-		return properties.add(property);
-	}
-
-	/**
-	 * Removes a property from this graphset.
-	 *
-	 * @param property the property to remove, cannot be null
-	 * @return true if the property was removed (was present)
-	 * @throws IllegalArgumentException if property is null
-	 */
-	public boolean removeProperty(Property property) {
-		if (property == null) {
-			throw new IllegalArgumentException("Property cannot be null");
-		}
-		return properties.remove(property);
-	}
-
-	/**
-	 * Adds an edge to this graphset.
-	 *
-	 * @param edge the edge to add, cannot be null
-	 * @return true if the edge was added (was not already present)
-	 * @throws IllegalArgumentException if edge is null
-	 */
-	public boolean addEdge(Edge edge) {
-		if (edge == null) {
-			throw new IllegalArgumentException("Edge cannot be null");
-		}
-		return edges.add(edge);
-	}
-
-	/**
-	 * Removes an edge from this graphset.
-	 *
-	 * @param edge the edge to remove, cannot be null
-	 * @return true if the edge was removed (was present)
-	 * @throws IllegalArgumentException if edge is null
-	 */
-	public boolean removeEdge(Edge edge) {
-		if (edge == null) {
-			throw new IllegalArgumentException("Edge cannot be null");
-		}
-		return edges.remove(edge);
 	}
 
 	/**
@@ -286,27 +166,185 @@ public class Graphset {
 	}
 
 	/**
-	 * Gets a list of vertices that are not fetched (maximum 50).
-	 * A vertex is considered not fetched if it doesn't have all required data
-	 * (label, description, URL, and position not at origin).
+	 * Retrieves a vertex from the graphset by its unique identifier (QID).
+	 * <p>
+	 * This method iterates through the collection of vertices in this graphset to
+	 * find
+	 * a vertex whose ID matches the supplied QID. If a matching vertex is found, it
+	 * is
+	 * returned; otherwise, {@code null} is returned.
+	 * </p>
 	 *
-	 * @return a list of unfetched vertices, limited to 50 items maximum
+	 * @param QID the unique identifier of the vertex to retrieve (e.g., a Wikidata
+	 *            QID)
+	 * @return the found {@link Vertex} with the specified ID, or {@code null} if
+	 *         not present
+	 */
+	public Vertex getVertexByID(String QID) {
+		for (Vertex vertex : vertices) {
+			if (vertex != null && vertex.getId().equals(QID)) {
+				return vertex;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Removes all entities from the graphset that match the specified ID.
+	 * <p>
+	 * This method will:
+	 * <ul>
+	 * <li>Remove any {@link Vertex} from the vertices collection whose ID equals
+	 * the provided value.</li>
+	 * <li>Remove any {@link Property} from the properties collection whose ID
+	 * equals the provided value.</li>
+	 * <li>Remove any {@link Edge} from the edges collection where the property ID,
+	 * source ID, or target ID matches the provided value.</li>
+	 * </ul>
+	 * This is useful for maintaining consistency within the graph when an entity or
+	 * property needs to be fully deleted, ensuring all references in edges,
+	 * vertices, and properties are removed.
+	 * </p>
+	 *
+	 * @param ID the unique identifier (entity or property ID) to match for removal;
+	 *           may be {@code null}
+	 */
+	public void removeAnyEntitiesMatchingID(String ID) {
+		// Remove matching vertex
+		vertices.removeIf(
+			vertex -> vertex != null && vertex.getId() != null && ID != null && ID.equals(vertex.getId())
+		);
+
+		// Remove matching property
+		properties.removeIf(
+			property -> property != null && property.getId() != null && ID != null && ID.equals(property.getId())
+		);
+
+		// Remove any edges where the property ID, source ID, or target ID matches
+		edges.removeIf(
+			edge ->
+				ID != null &&
+				((edge.getPropertyID() != null && ID.equals(edge.getPropertyID())) ||
+					(edge.getSourceID() != null && ID.equals(edge.getSourceID())) ||
+					(edge.getTargetID() != null && ID.equals(edge.getTargetID())))
+		);
+	}
+
+	/**
+	 * Returns a list of IDs (entity or property IDs) referenced by edges in this
+	 * graphset
+	 * that have not yet been fetched or populated fully in the graphset. An
+	 * entity/property
+	 * is considered unfetched if it appears in an edge, but does not exist as a
+	 * fully
+	 * populated Vertex or Property in the graphset collections.
+	 * <p>
+	 * This method is useful for determining which additional Wikidata entities or
+	 * properties
+	 * need to be fetched in order to complete the current graphset structure.
+	 * </p>
+	 *
+	 * @return a list of unfetched entity and property IDs referenced by edges but
+	 *         not present in the graphset
 	 */
 	@JsonIgnore
-	public List<Vertex> getUnfetchedVertices() {
-		List<Vertex> unfetchedVertices = new ArrayList<>();
+	public List<String> getUnfetchedEntityList() {
+		// Use a Set for efficient lookups of fetched IDs (O(1) per lookup)
+		Set<String> fetchedIds = new HashSet<>(getAllFetchedIDs());
+		// Use a LinkedHashSet to maintain insertion order and avoid duplicates
+		Set<String> unfetched = new LinkedHashSet<>();
 
+		for (Edge edge : edges) {
+			String propId = edge.getPropertyID();
+			String srcId = edge.getSourceID();
+			String tgtId = edge.getTargetID();
+
+			// Only add if not already fetched and not null
+			if (propId != null && !fetchedIds.contains(propId)) {
+				unfetched.add(propId);
+			}
+			if (srcId != null && !fetchedIds.contains(srcId)) {
+				unfetched.add(srcId);
+			}
+			if (tgtId != null && !fetchedIds.contains(tgtId)) {
+				unfetched.add(tgtId);
+			}
+		}
+		return new ArrayList<>(unfetched);
+	}
+
+	/**
+	 * Retrieves the source and target Vertex objects for the given edge from this
+	 * graphset.
+	 * <p>
+	 * Looks up each endpoint by its ID in the edge. If the corresponding Vertex is
+	 * not
+	 * present in the graphset, that endpoint will be {@code null}.
+	 * </p>
+	 *
+	 * @param e the {@link Edge} for which to retrieve endpoints
+	 * @return a {@link Tuple2} containing the source and target {@link Vertex}
+	 *         objects;
+	 *         either element of the tuple can be {@code null} if the corresponding
+	 *         vertex is
+	 *         not present in the graphset
+	 */
+	@JsonIgnore
+	public Tuple2<Vertex, Vertex> getEndpoints(Edge e) {
+		Vertex source = getVertexByID(e.getSourceID());
+		Vertex target = getVertexByID(e.getTargetID());
+		return new Tuple2<>(source, target);
+	}
+
+	// !PRIVATE ============================================================>
+	// !PRIVATE ============================================================>
+
+	/**
+	 * Returns a list of IDs for all entities (vertices) and properties in this
+	 * graphset
+	 * that are not fully fetched.
+	 * <p>
+	 * An entity or property is considered "not fully fetched" if its
+	 * {@code isFetched()} method
+	 * returns {@code false}. Only IDs that are not null are included in the result
+	 * list.
+	 * This method is useful for identifying which vertices or properties require
+	 * additional data fetching or population within the graphset structure.
+	 * </p>
+	 *
+	 * @return a list of IDs for unfetched vertices and properties, or an empty list
+	 *         if all are fetched
+	 */
+	/**
+	 * Returns a list of IDs of all fetched vertices and properties in this
+	 * graphset.
+	 * Only IDs for which isFetched() returns true and are non-null are included.
+	 *
+	 * @return a list of fully-fetched vertex and property IDs.
+	 */
+	private List<String> getAllFetchedIDs() {
+		List<String> fetchedIds = new ArrayList<>();
+
+		// Add fully-fetched vertex IDs
 		for (Vertex vertex : vertices) {
-			if (!vertex.fetched()) {
-				unfetchedVertices.add(vertex);
-
-				// Limit to maximum 50 vertices
-				if (unfetchedVertices.size() >= 50) {
-					break;
+			if (vertex.isFetched()) {
+				String id = vertex.getId();
+				if (id != null) {
+					fetchedIds.add(id);
 				}
 			}
 		}
 
-		return unfetchedVertices;
+		// Add fully-fetched property IDs
+		for (Property property : properties) {
+			if (property.isFetched()) {
+				String id = property.getId();
+				if (id != null) {
+					fetchedIds.add(id);
+				}
+			}
+		}
+
+		return fetchedIds;
 	}
 }

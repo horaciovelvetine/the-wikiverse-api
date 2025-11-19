@@ -8,15 +8,17 @@ import java.awt.geom.Point2D;
  * This class extends Point2D.Double to provide 3D functionality while
  * maintaining compatibility with 2D operations.
  *
- * <p>This class provides methods to manage 3D point properties such as:
+ * <p>
+ * This class provides methods to manage 3D point properties such as:
  * <ul>
- *   <li>Coordinate access and modification</li>
- *   <li>Distance calculations in 3D space</li>
- *   <li>Location setting and copying</li>
- *   <li>String representation and equality comparison</li>
+ * <li>Coordinate access and modification</li>
+ * <li>Distance calculations in 3D space</li>
+ * <li>Location setting and copying</li>
+ * <li>String representation and equality comparison</li>
  * </ul>
  *
- * <p>The class uses Jackson annotations for JSON serialization/deserialization
+ * <p>
+ * The class uses Jackson annotations for JSON serialization/deserialization
  * with field visibility set to ANY for automatic property mapping.
  *
  * @author @horaciovelvetine
@@ -64,7 +66,8 @@ public class Point3D extends Point2D.Double {
 
 	/**
 	 * Sets the location of this point to the specified coordinates.
-	 * This method updates all three coordinates of the point to the provided values,
+	 * This method updates all three coordinates of the point to the provided
+	 * values,
 	 * effectively moving the point to a new location in 3D space.
 	 *
 	 * @param x the new x-coordinate for this point
@@ -77,7 +80,8 @@ public class Point3D extends Point2D.Double {
 	}
 
 	/**
-	 * Sets the location of this point to the coordinates of the specified Point3D object.
+	 * Sets the location of this point to the coordinates of the specified Point3D
+	 * object.
 	 * This method copies the coordinates from another Point3D object, effectively
 	 * moving this point to the same location as the source point.
 	 *
@@ -88,8 +92,10 @@ public class Point3D extends Point2D.Double {
 	}
 
 	/**
-	 * Calculates the square of the Euclidean distance between two points in 3D space.
-	 * This static method computes the squared distance without taking the square root,
+	 * Calculates the square of the Euclidean distance between two points in 3D
+	 * space.
+	 * This static method computes the squared distance without taking the square
+	 * root,
 	 * which is useful for performance optimization when only comparing distances.
 	 *
 	 * @param x1 the x-coordinate of the first point
@@ -108,26 +114,30 @@ public class Point3D extends Point2D.Double {
 	}
 
 	/**
-	 * Calculates the square of the Euclidean distance between this point and the specified point in 3D space.
+	 * Calculates the square of the Euclidean distance between this point and the
+	 * specified point in 3D space.
 	 * This method computes the squared distance without taking the square root,
 	 * which is useful for performance optimization when only comparing distances.
 	 *
 	 * @param x the x-coordinate of the target point
 	 * @param y the y-coordinate of the target point
 	 * @param z the z-coordinate of the target point
-	 * @return the square of the Euclidean distance between this point and the specified point
+	 * @return the square of the Euclidean distance between this point and the
+	 *         specified point
 	 */
 	public double distanceSq(double x, double y, double z) {
 		return distanceSq(getX(), getY(), this.z, x, y, z);
 	}
 
 	/**
-	 * Calculates the square of the Euclidean distance between this point and the specified Point3D object in 3D space.
+	 * Calculates the square of the Euclidean distance between this point and the
+	 * specified Point3D object in 3D space.
 	 * This method computes the squared distance without taking the square root,
 	 * which is useful for performance optimization when only comparing distances.
 	 *
 	 * @param pt the Point3D object to calculate the distance to
-	 * @return the square of the Euclidean distance between this point and the specified Point3D object
+	 * @return the square of the Euclidean distance between this point and the
+	 *         specified Point3D object
 	 */
 	public double distanceSq(Point3D pt) {
 		return distanceSq(x, y, z, pt.getX(), pt.getY(), pt.getZ());
@@ -151,7 +161,8 @@ public class Point3D extends Point2D.Double {
 	}
 
 	/**
-	 * Calculates the Euclidean distance between this point and the specified point in 3D space.
+	 * Calculates the Euclidean distance between this point and the specified point
+	 * in 3D space.
 	 * This method computes the actual distance by taking the square root
 	 * of the squared distance calculation.
 	 *
@@ -165,22 +176,44 @@ public class Point3D extends Point2D.Double {
 	}
 
 	/**
-	 * Calculates the Euclidean distance between this point and the specified Point3D object in 3D space.
+	 * Calculates the Euclidean distance between this point and the specified
+	 * Point3D object in 3D space.
 	 * This method computes the actual distance by taking the square root
 	 * of the squared distance calculation.
 	 *
 	 * @param pt the Point3D object to calculate the distance to
-	 * @return the Euclidean distance between this point and the specified Point3D object
+	 * @return the Euclidean distance between this point and the specified Point3D
+	 *         object
 	 */
 	public double distance(Point3D pt) {
 		return Math.sqrt(distanceSq(pt));
 	}
 
 	/**
+	 * Resets the coordinates of this Point3D object to the origin (0, 0, 0).
+	 * <p>
+	 * If any of the coordinates (x, y, or z) are not already zero, this method sets
+	 * all three to zero. This is useful for reusing the same Point3D instance
+	 * without
+	 * creating a new object, such as in iterative computations or geometry
+	 * manipulations.
+	 * </p>
+	 */
+	public void reset() {
+		if (x != 0.0 || y != 0.0 || z != 0.0) {
+			x = 0.0;
+			y = 0.0;
+			z = 0.0;
+		}
+	}
+
+	/**
 	 * Returns a string representation of this Point3D object.
-	 * The string format is "xyz:[x, y, z]" where x, y, and z are the coordinate values.
+	 * The string format is "xyz:[x, y, z]" where x, y, and z are the coordinate
+	 * values.
 	 *
-	 * @return a string representation of this Point3D object in the format "xyz:[x, y, z]"
+	 * @return a string representation of this Point3D object in the format "xyz:[x,
+	 *         y, z]"
 	 */
 	@Override
 	public String toString() {

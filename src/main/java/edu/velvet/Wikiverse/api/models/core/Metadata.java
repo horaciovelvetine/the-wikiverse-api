@@ -1,7 +1,9 @@
 package edu.velvet.Wikiverse.api.models.core;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Represents metadata configuration for graph layout algorithms in the
@@ -47,10 +49,29 @@ public class Metadata {
 
 	private String wikiLangTarget = "en";
 
-	public Metadata(String origindID, String wikiLangTarget) {
+	public Metadata(String origindID, String wikiLangTarget, String prefers3D) {
 		this.originID = origindID;
 		this.wikiLangTarget = wikiLangTarget;
-		this.layoutSettings = new LayoutSettings();
+		this.layoutSettings = new LayoutSettings(prefers3D);
+	}
+
+	/**
+	 * Constructs a Metadata object from JSON deserialization.
+	 * This constructor is used by Jackson to deserialize Metadata from JSON.
+	 *
+	 * @param originID the unique identifier of the Wikidata entity to use as the graph origin
+	 * @param wikiLangTarget the target language code for the graph content
+	 * @param layoutSettings the layout settings configuration
+	 */
+	@JsonCreator
+	public Metadata(
+		@JsonProperty("originID") String originID,
+		@JsonProperty("wikiLangTarget") String wikiLangTarget,
+		@JsonProperty("layoutSettings") LayoutSettings layoutSettings
+	) {
+		this.originID = originID;
+		this.wikiLangTarget = wikiLangTarget;
+		this.layoutSettings = layoutSettings;
 	}
 
 	/**
