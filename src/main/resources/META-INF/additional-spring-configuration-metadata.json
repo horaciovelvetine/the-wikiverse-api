@@ -1,0 +1,29 @@
+{
+	"properties": [
+		{
+			"name": "wikiverse.api.debug",
+			"type": "java.lang.String",
+			"description": "Enables verbose debug logging for the Wikiverse API service. Set to 'true' to activate detailed logs for development and troubleshooting."
+		},
+		{
+			"name": "wikiverse.api.cache.enabled",
+			"type": "java.lang.String",
+			"description": "Controls whether the Wikiverse API caching mechanism is active. Set to 'true' to cache frequently accessed data for improved performance."
+		},
+		{
+			"name": "wikiverse.api.rate-limit.enabled",
+			"type": "java.lang.String",
+			"description": "Enables or disables rate limiting for incoming API requests. Set to 'true' to restrict request rates and prevent abuse."
+		},
+		{
+			"name": "wikiverse.api.rate-limit.requests-per-minute",
+			"type": "java.lang.String",
+			"description": "Specifies the maximum number of API requests allowed per minute per client. Used when rate limiting is enabled."
+		},
+		{
+			"name": "wikiverse.api.logging.json-files.enabled",
+			"type": "java.lang.String",
+			"description": "Determines whether API request and response logs are written as JSON files. Set to 'true' to enable JSON file logging for audit or debugging."
+		}
+	]
+}
