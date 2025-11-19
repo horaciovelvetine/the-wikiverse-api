@@ -1,5 +1,8 @@
 package edu.velvet.Wikiverse.api.services.logging;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import edu.velvet.Wikiverse.api.models.core.Vertex;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,7 +10,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.wikidata.wdtk.datamodel.implementation.ItemDocumentImpl;
 import org.wikidata.wdtk.datamodel.implementation.PropertyDocumentImpl;
@@ -16,10 +19,9 @@ import org.wikidata.wdtk.datamodel.interfaces.EntityDocument;
 import org.wikidata.wdtk.datamodel.interfaces.EntityIdValue;
 import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
 import org.wikidata.wdtk.datamodel.interfaces.PropertyDocument;
+import org.wikidata.wdtk.datamodel.interfaces.Statement;
 import org.wikidata.wdtk.datamodel.interfaces.StatementDocument;
 import org.wikidata.wdtk.wikibaseapi.WbSearchEntitiesResult;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 /**
  * A specialized logger for Wikidata document entities that provides structured
@@ -177,9 +179,9 @@ public class WikidataDocumentLogger implements Mappable {
 
 			// Count files before deletion for reporting
 			long fileCount = Files.list(docsPath)
-					.filter(Files::isRegularFile)
-					.filter(path -> path.toString().toLowerCase().endsWith(".json"))
-					.count();
+				.filter(Files::isRegularFile)
+				.filter(path -> path.toString().toLowerCase().endsWith(".json"))
+				.count();
 
 			if (fileCount == 0) {
 				print("Docs directory is empty, nothing to clear");
@@ -188,16 +190,16 @@ public class WikidataDocumentLogger implements Mappable {
 
 			// Delete all JSON files in the directory
 			Files.list(docsPath)
-					.filter(Files::isRegularFile)
-					.filter(path -> path.toString().toLowerCase().endsWith(".json"))
-					.forEach(path -> {
-						try {
-							Files.delete(path);
-							print("Deleted existing document file: " + path.getFileName());
-						} catch (IOException e) {
-							print("Warning: Could not delete file " + path.getFileName() + ": " + e.getMessage());
-						}
-					});
+				.filter(Files::isRegularFile)
+				.filter(path -> path.toString().toLowerCase().endsWith(".json"))
+				.forEach(path -> {
+					try {
+						Files.delete(path);
+						print("Deleted existing document file: " + path.getFileName());
+					} catch (IOException e) {
+						print("Warning: Could not delete file " + path.getFileName() + ": " + e.getMessage());
+					}
+				});
 
 			print("Cleared " + fileCount + " existing document files from docs directory");
 		} catch (IOException e) {
@@ -292,6 +294,58 @@ public class WikidataDocumentLogger implements Mappable {
 		});
 	}
 
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	// ! HERE HERE HERE HERE HERE
+	public void log(Map<String, List<Statement>> statements, Vertex v) {
+		try {
+			String jsonString = Mappable.mapper.writeValueAsString(statements);
+
+			String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
+			String fileName = String.format("%s_%s_%s.json", v.getId(), "statements", timestamp);
+
+			// Ensure docs directory ends with a separator and exists
+			String docsDir = DOCS_DIR.endsWith(File.separator) ? DOCS_DIR : DOCS_DIR + File.separator;
+			File dir = new File(docsDir);
+			if (!dir.exists()) {
+				boolean created = dir.mkdirs();
+				if (!created) {
+					logfile.write("Failed to create docs directory: " + docsDir);
+				}
+			}
+
+			String filePath = docsDir + fileName;
+
+			try (FileWriter writer = new FileWriter(filePath)) {
+				writer.write(jsonString);
+				logfile.write("Logged statements JSON to file: " + filePath);
+			}
+
+			logfile.write("Completed Logging Statements to File");
+		} catch (JsonProcessingException e) {
+			logfile.write("Failed to serialize statements to JSON: " + e.getMessage());
+		} catch (IOException e) {
+			logfile.write("Failed to write statements to file: " + e.getMessage());
+		}
+	}
+
 	/**
 	 * Logs basic entity information for unhandled EntityDocument types.
 	 *
@@ -305,11 +359,12 @@ public class WikidataDocumentLogger implements Mappable {
 	private void logEntityDocID(EntityDocument entityDoc) {
 		EntityIdValue entId = entityDoc.getEntityId();
 		String logEntry = String.format(
-				"Unhandled Entity Type - ID: %s, Type: %s, IRI: %s, Site IRI: %s",
-				entId.getId(),
-				entId.getEntityType(),
-				entId.getIri(),
-				entId.getSiteIri());
+			"Unhandled Entity Type - ID: %s, Type: %s, IRI: %s, Site IRI: %s",
+			entId.getId(),
+			entId.getEntityType(),
+			entId.getIri(),
+			entId.getSiteIri()
+		);
 		logfile.write(logEntry);
 	}
 
@@ -389,13 +444,15 @@ public class WikidataDocumentLogger implements Mappable {
 	 * @return the result of the operation
 	 */
 	private <T> T executeLoggingWithTiming(
-			String message,
-			String operationName,
-			java.util.function.Supplier<T> operation) {
+		String message,
+		String operationName,
+		java.util.function.Supplier<T> operation
+	) {
 		String logMessage = String.format(
-				"[%s] - %s",
-				LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-				message);
+			"[%s] - %s",
+			LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+			message
+		);
 
 		try {
 			print("Logging " + operationName + ": " + message);
@@ -476,22 +533,24 @@ public class WikidataDocumentLogger implements Mappable {
 			if (jsonFileLoggingEnabled) {
 				String fileName = writeSearchResultsToFile(searchResults, message, jsonString);
 				String summary = String.format(
-						"All %d search results stored in single JSON file: %s",
-						searchResults.size(),
-						fileName);
+					"All %d search results stored in single JSON file: %s",
+					searchResults.size(),
+					fileName
+				);
 				logfile.write(summary);
 			} else {
 				// JSON file logging disabled, just log basic summary for each result
 				for (int i = 0; i < searchResults.size(); i++) {
 					WbSearchEntitiesResult result = searchResults.get(i);
 					String summary = String.format(
-							"Result %d/%d - Entity ID: %s, Title: %s, Label: %s, Description: %s",
-							i + 1,
-							searchResults.size(),
-							result.getEntityId(),
-							result.getTitle(),
-							result.getLabel(),
-							result.getDescription());
+						"Result %d/%d - Entity ID: %s, Title: %s, Label: %s, Description: %s",
+						i + 1,
+						searchResults.size(),
+						result.getEntityId(),
+						result.getTitle(),
+						result.getLabel(),
+						result.getDescription()
+					);
 					logfile.write(summary);
 				}
 			}
@@ -501,16 +560,17 @@ public class WikidataDocumentLogger implements Mappable {
 			for (int i = 0; i < searchResults.size(); i++) {
 				WbSearchEntitiesResult result = searchResults.get(i);
 				String basicInfo = String.format(
-						"Result %d/%d - Entity ID: %s, Page ID: %d, Title: %s, Label: %s, Description: %s, URL: %s, Concept URI: %s",
-						i + 1,
-						searchResults.size(),
-						result.getEntityId(),
-						result.getPageId(),
-						result.getTitle(),
-						result.getLabel(),
-						result.getDescription(),
-						result.getUrl(),
-						result.getConceptUri());
+					"Result %d/%d - Entity ID: %s, Page ID: %d, Title: %s, Label: %s, Description: %s, URL: %s, Concept URI: %s",
+					i + 1,
+					searchResults.size(),
+					result.getEntityId(),
+					result.getPageId(),
+					result.getTitle(),
+					result.getLabel(),
+					result.getDescription(),
+					result.getUrl(),
+					result.getConceptUri()
+				);
 				logfile.write(basicInfo);
 			}
 		} catch (IOException e) {
@@ -519,16 +579,17 @@ public class WikidataDocumentLogger implements Mappable {
 			for (int i = 0; i < searchResults.size(); i++) {
 				WbSearchEntitiesResult result = searchResults.get(i);
 				String basicInfo = String.format(
-						"Result %d/%d - Entity ID: %s, Page ID: %d, Title: %s, Label: %s, Description: %s, URL: %s, Concept URI: %s",
-						i + 1,
-						searchResults.size(),
-						result.getEntityId(),
-						result.getPageId(),
-						result.getTitle(),
-						result.getLabel(),
-						result.getDescription(),
-						result.getUrl(),
-						result.getConceptUri());
+					"Result %d/%d - Entity ID: %s, Page ID: %d, Title: %s, Label: %s, Description: %s, URL: %s, Concept URI: %s",
+					i + 1,
+					searchResults.size(),
+					result.getEntityId(),
+					result.getPageId(),
+					result.getTitle(),
+					result.getLabel(),
+					result.getDescription(),
+					result.getUrl(),
+					result.getConceptUri()
+				);
 				logfile.write(basicInfo);
 			}
 		}
@@ -550,15 +611,16 @@ public class WikidataDocumentLogger implements Mappable {
 	 * @throws IOException if there's an error writing the file
 	 */
 	private <T extends EntityDocument> String writeJsonToFile(T document, String documentType, String jsonString)
-			throws IOException {
+		throws IOException {
 		// Generate unique filename based on entity ID and timestamp
 		EntityIdValue entityId = document.getEntityId();
 		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
 		String fileName = String.format(
-				"%s_%s_%s.json",
-				documentType.toLowerCase(),
-				entityId.getId().replace(":", "_"),
-				timestamp);
+			"%s_%s_%s.json",
+			documentType.toLowerCase(),
+			entityId.getId().replace(":", "_"),
+			timestamp
+		);
 
 		String filePath = DOCS_DIR + fileName;
 
@@ -587,17 +649,19 @@ public class WikidataDocumentLogger implements Mappable {
 	 * @throws IOException if there's an error writing the file
 	 */
 	private String writeSearchResultsToFile(
-			List<WbSearchEntitiesResult> searchResults,
-			String message,
-			String jsonString) throws IOException {
+		List<WbSearchEntitiesResult> searchResults,
+		String message,
+		String jsonString
+	) throws IOException {
 		// Generate unique filename based on message context and timestamp
 		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
 		String sanitizedMessage = message.replaceAll("[^a-zA-Z0-9]", "_").toLowerCase();
 		String fileName = String.format(
-				"searchresults_%s_%ditems_%s.json",
-				sanitizedMessage,
-				searchResults.size(),
-				timestamp);
+			"searchresults_%s_%ditems_%s.json",
+			sanitizedMessage,
+			searchResults.size(),
+			timestamp
+		);
 
 		String filePath = DOCS_DIR + fileName;
 
@@ -625,11 +689,12 @@ public class WikidataDocumentLogger implements Mappable {
 	private <T extends EntityDocument> String createDocumentSummary(T document, String documentType, String fileName) {
 		EntityIdValue entityId = document.getEntityId();
 		return String.format(
-				"%s - ID: %s, Type: %s, JSON stored in: %s",
-				documentType,
-				entityId.getId(),
-				entityId.getEntityType(),
-				fileName);
+			"%s - ID: %s, Type: %s, JSON stored in: %s",
+			documentType,
+			entityId.getId(),
+			entityId.getEntityType(),
+			fileName
+		);
 	}
 
 	/**
@@ -649,10 +714,11 @@ public class WikidataDocumentLogger implements Mappable {
 	private <T extends EntityDocument> String createDocumentSummaryWithoutFile(T document, String documentType) {
 		EntityIdValue entityId = document.getEntityId();
 		return String.format(
-				"%s - ID: %s, Type: %s (JSON file logging disabled)",
-				documentType,
-				entityId.getId(),
-				entityId.getEntityType());
+			"%s - ID: %s, Type: %s (JSON file logging disabled)",
+			documentType,
+			entityId.getId(),
+			entityId.getEntityType()
+		);
 	}
 
 	/**

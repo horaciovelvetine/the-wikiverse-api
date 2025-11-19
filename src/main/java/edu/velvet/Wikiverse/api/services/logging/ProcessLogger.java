@@ -157,9 +157,10 @@ public class ProcessLogger {
 		}
 
 		String logMessage = String.format(
-				"[%s] - %s",
-				LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
-				message);
+			"[%s] - %s",
+			LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME),
+			message
+		);
 
 		try {
 			print("Starting execution: " + message);
@@ -340,9 +341,10 @@ public class ProcessLogger {
 		}
 
 		String errorDetails = String.format(
-				"%s: %s",
-				exception.getClass().getSimpleName(),
-				exception.getMessage() != null ? exception.getMessage() : "No message available");
+			"%s: %s",
+			exception.getClass().getSimpleName(),
+			exception.getMessage() != null ? exception.getMessage() : "No message available"
+		);
 
 		print("ERROR in " + source + ": " + errorDetails);
 		logfile.write(logMessage + " - " + errorDetails);

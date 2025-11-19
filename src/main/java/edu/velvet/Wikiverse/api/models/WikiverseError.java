@@ -1,8 +1,7 @@
 package edu.velvet.Wikiverse.api.models;
 
-import java.time.Instant;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import java.time.Instant;
 
 /**
  * Represents the error hierarchy for the Wikiverse API application.
@@ -138,12 +137,13 @@ public sealed interface WikiverseError permits WikiverseError.ServiceFault, Wiki
 	 * @since 1.0
 	 */
 	public record ServiceFault(
-			String message,
-			String source,
-			Instant timestamp,
-			ErrorCategory category,
-			Integer httpStatusCode,
-			StackTraceElement[] stackTrace) implements WikiverseError {
+		String message,
+		String source,
+		Instant timestamp,
+		ErrorCategory category,
+		Integer httpStatusCode,
+		StackTraceElement[] stackTrace
+	) implements WikiverseError {
 		/**
 		 * Convenience constructor with minimal required parameters.
 		 * Uses default values for HTTP status code and stack trace, generates
@@ -203,12 +203,13 @@ public sealed interface WikiverseError permits WikiverseError.ServiceFault, Wiki
 		 * @since 1.0
 		 */
 		record APIOffline(
-				String message,
-				String source,
-				Instant timestamp,
-				ErrorCategory category,
-				Integer httpStatusCode,
-				StackTraceElement[] stackTrace) implements WikidataServiceError {
+			String message,
+			String source,
+			Instant timestamp,
+			ErrorCategory category,
+			Integer httpStatusCode,
+			StackTraceElement[] stackTrace
+		) implements WikidataServiceError {
 			/**
 			 * Convenience constructor with minimal required parameters.
 			 * Uses default values for timestamp and category, generates timestamp.
@@ -248,11 +249,12 @@ public sealed interface WikiverseError permits WikiverseError.ServiceFault, Wiki
 		 *          original provided search String
 		 */
 		record NoMatchingResultsFound(
-				String queryValue,
-				Instant timestamp,
-				ErrorCategory category,
-				Integer httpStatusCode,
-				StackTraceElement[] stackTrace) implements WikidataServiceError {
+			String queryValue,
+			Instant timestamp,
+			ErrorCategory category,
+			Integer httpStatusCode,
+			StackTraceElement[] stackTrace
+		) implements WikidataServiceError {
 			/**
 			 * Convenience constructor with minimal required parameters.
 			 * Uses default values for timestamp, category, HTTP status code, and stack
@@ -309,12 +311,13 @@ public sealed interface WikiverseError permits WikiverseError.ServiceFault, Wiki
 		 * @since 1.0
 		 */
 		record UnableToProcessWikidataEntity(
-				String message,
-				String source,
-				Instant timestamp,
-				ErrorCategory category,
-				Integer httpStatusCode,
-				StackTraceElement[] stackTrace) implements WikidataServiceError {
+			String message,
+			String source,
+			Instant timestamp,
+			ErrorCategory category,
+			Integer httpStatusCode,
+			StackTraceElement[] stackTrace
+		) implements WikidataServiceError {
 			/**
 			 * Convenience constructor with minimal required parameters.
 			 * Uses default values for timestamp, category, HTTP status code, and stack

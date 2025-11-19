@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -169,11 +168,12 @@ public class Logfile {
 
 			long currentFileSize = new File(logFile).length();
 			print(
-					"Message written successfully. Current file size: " +
-							currentFileSize +
-							" bytes (limit: " +
-							MAX_FILE_SIZE +
-							" bytes)");
+				"Message written successfully. Current file size: " +
+				currentFileSize +
+				" bytes (limit: " +
+				MAX_FILE_SIZE +
+				" bytes)"
+			);
 
 			if (currentFileSize > MAX_FILE_SIZE) {
 				print("File size exceeded limit! Initiating log rotation...");

@@ -1,19 +1,19 @@
 package edu.velvet.Wikiverse.api.services.logging;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-
-import org.junit.jupiter.api.AfterEach;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -263,9 +263,10 @@ public class LogfileTest {
 		try {
 			List<String> lines = Files.readAllLines(Paths.get(testLogFile));
 			assertEquals(
-					numberOfThreads * messagesPerThread,
-					lines.size(),
-					"All messages from all threads should be written");
+				numberOfThreads * messagesPerThread,
+				lines.size(),
+				"All messages from all threads should be written"
+			);
 		} catch (IOException e) {
 			fail("Failed to read log file: " + e.getMessage());
 		}
@@ -373,9 +374,10 @@ public class LogfileTest {
 		threads[2] = new Thread(() -> {
 			for (int i = 0; i < 2; i++) {
 				logfile.write(
-						"Very long message " +
-								i +
-								" with lots of additional text content that makes it much longer than the other messages");
+					"Very long message " +
+					i +
+					" with lots of additional text content that makes it much longer than the other messages"
+				);
 			}
 		});
 
