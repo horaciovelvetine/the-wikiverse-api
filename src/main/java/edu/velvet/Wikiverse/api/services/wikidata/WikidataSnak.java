@@ -1,13 +1,14 @@
 package edu.velvet.Wikiverse.api.services.wikidata;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import edu.velvet.Wikiverse.api.services.wikidata.WikidataValue.ValueType;
 import org.wikidata.wdtk.datamodel.implementation.ValueSnakImpl;
 import org.wikidata.wdtk.datamodel.interfaces.NoValueSnak;
 import org.wikidata.wdtk.datamodel.interfaces.Snak;
 import org.wikidata.wdtk.datamodel.interfaces.SnakVisitor;
 import org.wikidata.wdtk.datamodel.interfaces.SomeValueSnak;
 import org.wikidata.wdtk.datamodel.interfaces.ValueSnak;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Represents a Wikidata Snak (statement) in the Wikiverse graph structure.
@@ -35,6 +36,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @see WikidataValue
  * @see SnakVisitor
  */
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class WikidataSnak implements SnakVisitor<WikidataSnak> {
 
 	/**
@@ -103,7 +105,33 @@ public class WikidataSnak implements SnakVisitor<WikidataSnak> {
 	 */
 	@JsonIgnore
 	public boolean isNull() {
-		return this.value == null || this.datatype == null || this.property == null;
+		return (
+			this.getValue() == null ||
+			this.getDatatype() == null ||
+			this.getDatatype().isBlank() ||
+			this.getProperty().isNull()
+		);
+	}
+
+	/**
+	 * Determines whether this Snak's value refers to a Wikidata entity ID.
+	 * <p>
+	 * Returns {@code true} if the value of this Snak is of type
+	 * {@link ValueType#ENTITY_ID},
+	 * indicating that it points to another Wikidata entity and can be considered as
+	 * a candidate for an {@link edu.velvet.Wikiverse.api.models.core.Edge}.
+	 * <p>
+	 * This is useful for graph processing when identifying relationships between
+	 * entities.
+	 *
+	 * @return true if the value type is ENTITY_ID; false otherwise
+	 */
+	@JsonIgnore
+	public boolean hasWikidataEntityTarget() {
+		if (this.getValue() == null) {
+			return false;
+		}
+		return this.getValue().getType().equals(ValueType.ENTITY_ID);
 	}
 
 	/**
