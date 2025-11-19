@@ -1,17 +1,19 @@
 package edu.velvet.Wikiverse.api.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
+import edu.velvet.Wikiverse.api.models.WikiverseError;
 import edu.velvet.Wikiverse.api.models.requests.GraphsetRequest;
 import edu.velvet.Wikiverse.api.models.requests.Request;
 import edu.velvet.Wikiverse.api.models.requests.SearchRequest;
 import edu.velvet.Wikiverse.api.models.requests.StatusRequest;
 import edu.velvet.Wikiverse.api.services.wikidata.WikidataService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @CrossOrigin
 @RestController
@@ -82,7 +84,7 @@ public class WikiverseRequestsController {
 	 */
 	@GetMapping("/api/search-results")
 	public ResponseEntity<Request> getSearchResults(@RequestParam String query, @RequestParam String wikiLangTarget) {
-		return buildRequestResponse(new SearchRequest(query, wikiLangTarget).fetchSearchResults(wikidata));
+		return buildRequestResponse(new SearchRequest(query, wikiLangTarget, wikidata));
 	}
 
 	/**
@@ -121,13 +123,59 @@ public class WikiverseRequestsController {
 	 * @version 1.0
 	 * @since 1.0
 	 */
-	@GetMapping("api/graphset/initialize")
-	public ResponseEntity<Request> getInitializedGraphset(
-			@RequestParam String targetID,
-			@RequestParam String wikiLangTarget,
-			@RequestParam String prefers3D) {
-		return buildRequestResponse(new GraphsetRequest(targetID, wikiLangTarget).initializeGraphset(wikidata));
+	@GetMapping("api/graphset/initialize-origin")
+	public ResponseEntity<Request> getGraphsetInitializeOrigin(
+		@RequestParam String targetID,
+		@RequestParam String wikiLangTarget,
+		@RequestParam String prefers3D
+	) {
+		return buildRequestResponse(new GraphsetRequest(targetID, wikiLangTarget, prefers3D, wikidata));
 	}
+
+	/**
+	 * Initializes graphset data from a POST request containing metadata and
+	 * graphset information.
+	 * This endpoint accepts a JSON payload with metadata configuration and graphset
+	 * structure
+	 * and processes it to initialize or update the graphset data.
+	 *
+	 * <p>
+	 * The initialization process includes:
+	 * <ul>
+	 * <li>Deserializing the metadata and graphset from the request body</li>
+	 * <li>Validating the provided graphset structure and metadata</li>
+	 * <li>Processing the graphset data through the Wikidata service</li>
+	 * <li>Error handling for invalid or malformed requests</li>
+	 * </ul>
+	 *
+	 * <p>
+	 * This endpoint is used for initializing graphset data from client-provided
+	 * JSON,
+	 * allowing the frontend to send complete graphset structures for processing.
+	 * The response includes the processed GraphsetRequest and any errors
+	 * encountered
+	 * during the initialization process.
+	 *
+	 * @param request the GraphsetRequest containing metadata and graphset data from
+	 *                the request body
+	 * @return ResponseEntity containing the GraphsetRequest with processed data
+	 *         and appropriate HTTP status code
+	 * @see GraphsetRequest
+	 * @see Metadata
+	 * @see Graphset
+	 * @see #buildRequestResponse(Request)
+	 * @author The Wikiverse Team
+	 * @version 1.0
+	 * @since 1.0
+	 */
+	@PostMapping("api/graphset/initialize-data")
+	public ResponseEntity<Request> postGraphsetInitialData(@RequestBody GraphsetRequest request) {
+		return buildRequestResponse(request.initializeData(wikidata));
+	}
+
+	// TODO: PostMapping("/api/graphset/get-click-target-data")
+	// TODO: PostMapping("/api/layout/refresh-positions")
+	// TODO: PostMapping("/api/layout/update-dimensions")
 
 	// !PRIVATE ============================================================>
 	// !PRIVATE ============================================================>
@@ -165,7 +213,7 @@ public class WikiverseRequestsController {
 	 */
 	private ResponseEntity<Request> buildRequestResponse(Request request) {
 		return request.markCompleted().errored()
-				? ResponseEntity.status(request.getError().httpStatusCode()).body(request)
-				: ResponseEntity.status(200).body(request);
+			? ResponseEntity.status(request.getError().httpStatusCode()).body(request)
+			: ResponseEntity.status(200).body(request);
 	}
 }
