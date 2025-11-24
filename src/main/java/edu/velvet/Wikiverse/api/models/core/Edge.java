@@ -55,13 +55,6 @@ public class Edge {
 	private final String propertyID;
 
 	/**
-	 * An alternative text description of the relationship when a property ID is not
-	 * appropriate (e.g. for dates).
-	 * Can be null if using a property ID instead.
-	 */
-	private final String label;
-
-	/**
 	 * The statement ID from Wikidata that uniquely identifies the provenance of
 	 * this edge.
 	 * This value is derived from the Statement object and is used to trace the edge
@@ -96,7 +89,6 @@ public class Edge {
 		this.sourceID = statement.getSubject().getId();
 		this.targetID = mainSnak.getValue().getValue();
 		this.propertyID = mainSnak.getProperty().getValue();
-		this.label = null;
 	}
 
 	/**
@@ -125,31 +117,30 @@ public class Edge {
 		this.sourceID = mainSnak.getValue().getValue(); // ! Set MainSnak TargetID as Source
 		this.targetID = qualifierSnak.getValue().getValue(); // ! Set QualifierSnak as TargetID
 		this.propertyID = qualifierSnak.getProperty().getValue(); // ! Property from QualifierSnak
-		this.label = null;
 	}
 
 	/**
 	 * Constructs an Edge object from JSON deserialization.
 	 * This constructor is used by Jackson to deserialize Edge from JSON.
 	 *
-	 * @param sourceID the ID of the source vertex that this edge connects from
-	 * @param targetID the ID of the target vertex that this edge connects to
-	 * @param propertyID the ID of the property that describes the relationship between the vertices
-	 * @param label an alternative text description of the relationship when a property ID is not appropriate
-	 * @param statementID the statement ID from Wikidata that uniquely identifies the provenance of this edge
+	 * @param sourceID    the ID of the source vertex that this edge connects from
+	 * @param targetID    the ID of the target vertex that this edge connects to
+	 * @param propertyID  the ID of the property that describes the relationship
+	 *                    between the vertices
+	 * @param label       an alternative text description of the relationship when a
+	 *                    property ID is not appropriate
+	 * @param statementID the statement ID from Wikidata that uniquely identifies
+	 *                    the provenance of this edge
 	 */
 	@JsonCreator
 	public Edge(
-		@JsonProperty("sourceID") String sourceID,
-		@JsonProperty("targetID") String targetID,
-		@JsonProperty("propertyID") String propertyID,
-		@JsonProperty("label") String label,
-		@JsonProperty("statementID") String statementID
-	) {
+			@JsonProperty("sourceID") String sourceID,
+			@JsonProperty("targetID") String targetID,
+			@JsonProperty("propertyID") String propertyID,
+			@JsonProperty("statementID") String statementID) {
 		this.sourceID = sourceID;
 		this.targetID = targetID;
 		this.propertyID = propertyID;
-		this.label = label;
 		this.statementID = statementID;
 	}
 
@@ -187,15 +178,5 @@ public class Edge {
 	 */
 	public String getPropertyID() {
 		return propertyID;
-	}
-
-	/**
-	 * Gets the alternative means of describing a relationship's nature when a
-	 * property doesn't make sense (used for dates).
-	 *
-	 * @return the relationship label, or null if not set
-	 */
-	public String getLabel() {
-		return label;
 	}
 }

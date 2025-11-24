@@ -1,14 +1,14 @@
 package edu.velvet.Wikiverse.api.models.core;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
+import org.wikidata.wdtk.datamodel.interfaces.SiteLink;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.List;
-import org.wikidata.wdtk.datamodel.interfaces.ItemDocument;
-import org.wikidata.wdtk.datamodel.interfaces.SiteLink;
 
 /**
  * Represents a vertex (node) in the Wikiverse graph structure.
@@ -55,8 +55,6 @@ public class Vertex {
 
 	/** Flag indicating whether this vertex is locked from modifications. */
 	private boolean locked = false;
-
-	private final List<Claim> claims = new ArrayList<>();
 
 	/**
 	 * Constructs a Vertex instance from a Wikidata ItemDocument and a target wiki
@@ -114,14 +112,12 @@ public class Vertex {
 	 */
 	@JsonCreator
 	public Vertex(
-		@JsonProperty("id") String id,
-		@JsonProperty("label") String label,
-		@JsonProperty("description") String description,
-		@JsonProperty("url") String url,
-		@JsonProperty("position") Point3D position,
-		@JsonProperty("locked") boolean locked,
-		@JsonProperty("claims") List<Claim> claims
-	) {
+			@JsonProperty("id") String id,
+			@JsonProperty("label") String label,
+			@JsonProperty("description") String description,
+			@JsonProperty("url") String url,
+			@JsonProperty("position") Point3D position,
+			@JsonProperty("locked") boolean locked) {
 		this.id = id;
 		this.label = label;
 		this.description = description;
@@ -130,9 +126,6 @@ public class Vertex {
 			this.position.setLocation(position);
 		}
 		this.locked = locked;
-		if (claims != null) {
-			this.claims.addAll(claims);
-		}
 	}
 
 	/**
@@ -178,15 +171,6 @@ public class Vertex {
 	 */
 	public Point3D getPosition() {
 		return position;
-	}
-
-	/**
-	 * Returns the list of claims associated with this vertex.
-	 *
-	 * @return a list of {@link Claim} objects; never null but may be empty
-	 */
-	public List<Claim> getClaims() {
-		return this.claims;
 	}
 
 	/**
@@ -241,21 +225,10 @@ public class Vertex {
 		if (url == null) {
 			return false;
 		}
-
 		// Check if position is not at the default origin (0,0,0)
-		if (position == null) {
-			return false;
-		}
-
-		// Check if position is not at origin (0,0,0)
-		// Using a small epsilon for floating-point comparison
-		final double EPSILON = 1e-9;
-		boolean isAtOrigin =
-			Math.abs(position.getX()) < EPSILON &&
-			Math.abs(position.getY()) < EPSILON &&
-			Math.abs(position.getZ()) < EPSILON;
-
-		return !isAtOrigin;
+		// The origin vertex (0,0,0) should be considered fetched just like any other.
+		// So, simply return true here—having a non-null position is already checked.
+		return position != null;
 	}
 
 	/**
@@ -282,11 +255,10 @@ public class Vertex {
 		if (link == null) {
 			// If there are SiteLinks but not for this language, still throw an error
 			throw new IllegalArgumentException(
-				"Cannot create Vertex: Entity " +
-				doc.getEntityId().getId() +
-				" has no SiteLink for language: " +
-				language
-			);
+					"Cannot create Vertex: Entity " +
+							doc.getEntityId().getId() +
+							" has no SiteLink for language: " +
+							language);
 		}
 
 		String pageTitle = link.getPageTitle();
