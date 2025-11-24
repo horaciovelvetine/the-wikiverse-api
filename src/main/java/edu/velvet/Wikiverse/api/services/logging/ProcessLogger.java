@@ -359,6 +359,47 @@ public class ProcessLogger {
 	}
 
 	/**
+	 * Logs an informational message to both console and logfile with timestamp.
+	 *
+	 * <p>
+	 * This method provides a lightweight way to log informational messages during
+	 * process execution without wrapping code in execution blocks. It is ideal for
+	 * tracking step-by-step progress, state changes, and debugging details. The
+	 * message is formatted with a timestamp and written to both the console (if
+	 * verbose mode is enabled) and the logfile for persistent storage.
+	 *
+	 * <p>
+	 * The method performs the following operations:
+	 * <ul>
+	 * <li>Creates a timestamped log message with INFO prefix</li>
+	 * <li>Outputs the message to console if verbose mode is enabled</li>
+	 * <li>Writes the message to the logfile for persistent storage</li>
+	 * </ul>
+	 *
+	 * <p>
+	 * Usage example:
+	 *
+	 * <pre>{@code
+	 * ProcessLogger logger = new ProcessLogger("process.log");
+	 * logger.logInfo("Starting iteration " + iterationCount);
+	 * logger.logInfo("Temperature: " + temperature);
+	 * logger.logInfo("Completed repulsion calculations for vertex: " + vertexId);
+	 * }</pre>
+	 *
+	 * @param message the informational message to log (cannot be null)
+	 * @throws IllegalArgumentException if message is null
+	 */
+	public void logInfo(String message) {
+		if (message == null) {
+			throw new IllegalArgumentException("Message cannot be null");
+		}
+		String timestamp = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+		String logMessage = String.format("[%s] - INFO: %s", timestamp, message);
+		print("INFO: " + message);
+		logfile.write(logMessage);
+	}
+
+	/**
 	 * Helper method to output messages to the console for debugging and user
 	 * feedback.
 	 *
