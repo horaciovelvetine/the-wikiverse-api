@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
 
 public class FR3DLayout {
 
-	private final ProcessLogger logger = new ProcessLogger("FR3DLayout");
+	private final ProcessLogger logger = new ProcessLogger("FR3DLayout.log");
 
 	private final double EPSILON = 0.000001D; // Prevent 0/div errors
 	private int iterationCount = 0;
@@ -59,28 +59,63 @@ public class FR3DLayout {
 		this.locations = buildLocationCache();
 
 		// PHYSICAL FORCE THINGS
-		this.temperature = dimensions.getHeight() / this.temperatureCurveMultiplier;
+		// Initialize temperature based on dimension size, ensuring it's large enough
+		// to allow meaningful movement in early iterations
+		this.temperature = Math.max(dimensions.getHeight() / this.temperatureCurveMultiplier, 10.0);
 		double forceConstant = Math.sqrt((dimensions.getHeight() * dimensions.getWidth()) / vertexCount);
 		this.attractionForce = forceConstant * layoutSettings.getAttractionMultiplier().doubleValue();
 		this.repulsionForce = forceConstant * layoutSettings.getRepulsionMultiplier().doubleValue();
 	}
 
 	/**
-	 * Runs the force-directed layout algorithm for the given graph.
+	 * Executes the full 3D force-directed layout for the provided graph.
 	 * <p>
-	 * This method repeatedly performs layout steps by invoking
-	 * {@link #stepLayout(Graphset)}
-	 * until the layout process is complete. The termination condition is determined
-	 * by {@link #layoutCompleted()}, which typically checks for convergence or
-	 * reaching the maximum number of allowed iterations.
+	 * This method repeatedly applies one layout step by calling
+	 * {@link #stepLayout(Graphset)} until either the layout converges or the
+	 * maximum
+	 * number of iterations is reached, as defined by {@link #layoutCompleted()}.
+	 * </p>
+	 * <p>
+	 * After completing the layout, all vertex positions in the given
+	 * {@link Graphset}
+	 * are updated to their final computed locations.
 	 * </p>
 	 *
-	 * @param graph the {@link Graphset} to lay out; must not be null
+	 * @param graph the {@link Graphset} to arrange; must be non-null and populated
+	 *              with vertices
 	 */
 	public void runLayout(Graphset graph) {
 		while (!layoutCompleted()) {
 			stepLayout(graph);
 		}
+
+		graph
+			.getVertices()
+			.forEach((Vertex v) -> {
+				Point3D newPosition = locations.getIfPresent(v);
+				if (newPosition != null) {
+					v.getPosition().setLocation(locations.getIfPresent(v));
+				}
+			});
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("FR3DLayout{");
+		sb.append("iterationCount=").append(iterationCount).append(", ");
+		sb.append("maxLayoutIterations=").append(maxLayoutIterations).append(", ");
+		sb.append("temperature=").append(temperature).append(", ");
+		sb.append("vertexDensity=").append(vertexDensity).append(", ");
+		sb.append("repulsionForce=").append(repulsionForce).append(", ");
+		sb.append("attractionForce=").append(attractionForce).append(", ");
+		sb.append("temperatureCurveMultiplier=").append(temperatureCurveMultiplier).append(", ");
+		sb.append("lockedVertexForceScaler=").append(lockedVertexForceScaler).append(", ");
+		sb.append("dimensions=").append(dimensions).append(", ");
+		sb.append("offsets size=").append(offsets != null ? offsets.size() : "null").append(", ");
+		sb.append("locations size=").append(locations != null ? locations.size() : "null");
+		sb.append("}");
+		return sb.toString();
 	}
 
 	// !PRIVATE ===================================================================>
@@ -101,6 +136,13 @@ public class FR3DLayout {
 	 * The resulting {@link Dimension} has both width and height set to this side
 	 * length.
 	 * </p>
+	 * <p>
+	 * A minimum dimension size of 100x100 is enforced to ensure the layout has
+	 * sufficient space
+	 * for force-directed calculations and to prevent premature convergence due to
+	 * overly small
+	 * temperature thresholds.
+	 * </p>
 	 *
 	 * @return a {@link Dimension} object representing the calculated width and
 	 *         height for
@@ -112,8 +154,7 @@ public class FR3DLayout {
 			return new Dimension(300, 300);
 		}
 
-		double targetArea = vertexCount / this.vertexDensity;
-
+		double targetArea = Math.pow(vertexCount, 3) / this.vertexDensity;
 		int sideLength = ((int) Math.sqrt(targetArea));
 
 		return new Dimension(sideLength, sideLength);
@@ -145,8 +186,8 @@ public class FR3DLayout {
 			// Only update the offset if the provided Vertex is not locked...
 			Point3D currentOffset = offsets.getUnchecked(v.getId());
 			double nX = currentOffset.getX() + (scale * dx);
-			double nY = currentOffset.getX() + (scale * dy);
-			double nZ = currentOffset.getX() + (scale * dz);
+			double nY = currentOffset.getY() + (scale * dy);
+			double nZ = currentOffset.getZ() + (scale * dz);
 
 			currentOffset.setLocation(nX, nY, nZ);
 		}
@@ -249,13 +290,19 @@ public class FR3DLayout {
 	 * maximum allowed
 	 * ({@code maxLayoutIterations}), or if the current temperature has cooled down
 	 * below
-	 * a minimal threshold determined by the inverse of the layout space height.
+	 * a minimal threshold. The threshold is set to a small fixed value (0.01) to
+	 * ensure
+	 * the layout runs for a reasonable number of iterations regardless of dimension
+	 * size.
 	 * </p>
 	 *
 	 * @return {@code true} if the layout is finished, {@code false} otherwise.
 	 */
 	private boolean layoutCompleted() {
-		return iterationCount > maxLayoutIterations || temperature < 1.0 / dimensions.getHeight();
+		// Use a fixed small threshold instead of dimension-based threshold
+		// to prevent premature convergence with small dimensions
+		final double MIN_TEMPERATURE_THRESHOLD = 0.01;
+		return iterationCount > maxLayoutIterations || temperature <= MIN_TEMPERATURE_THRESHOLD;
 	}
 
 	/**
@@ -334,6 +381,7 @@ public class FR3DLayout {
 			}
 		}
 		updateLayoutTemperature();
+		logger.logInfo(this.toString());
 	}
 
 	/**
@@ -357,14 +405,21 @@ public class FR3DLayout {
 	 * </p>
 	 */
 	private void updateLayoutTemperature() {
-		// Logarithmic decay using temperatureCurveMultiplier; higher means
-		// longer-lasting movement
 		double progress = (double) iterationCount / (double) maxLayoutIterations;
-		// Avoid log(0) and negative in bracket: add (1-tempCurve) to the curve
-		double decay = 1.0 / (1.0 + temperatureCurveMultiplier * Math.log1p(progress * temperatureCurveMultiplier));
-		// Limit: ensure temperature always decays, never increases
-		if (decay < 0.0) decay = 0.0;
+		// The higher the denominator, the slower the temperature cools
+		double decay = Math.pow(0.98, progress * temperatureCurveMultiplier);
+		// Ensure temperature always decays, never increases or goes negative
+		if (decay < 0.0) {
+			decay = 0.0;
+		}
 		temperature *= decay;
+
+		// Prevent temperature from dropping too far below a useful threshold,
+		// so there's always a little movement possible
+		final double minTemperature = 0.01;
+		if (temperature < minTemperature) {
+			temperature = minTemperature;
+		}
 	}
 
 	// *===========================================================================>
@@ -386,17 +441,20 @@ public class FR3DLayout {
 				Point3D p1 = locations.getUnchecked(v1);
 				Point3D p2 = locations.getUnchecked(v2);
 
-				double deltaDistance = Math.max(EPSILON, p1.distanceSq(p2));
+				double deltaDistanceSq = Math.max(EPSILON, p1.distanceSq(p2));
+				double deltaDistance = Math.sqrt(deltaDistanceSq);
 
-				double force = (repulsionForce * repulsionForce) / deltaDistance;
+				double force = (repulsionForce * repulsionForce) / deltaDistanceSq;
 
 				if (Double.isNaN(force)) {
 					throw new RuntimeException("calculateRepulsionOffsets() found NaN value for: force");
 				}
 
-				double xDisplacement = (p1.getX() - p2.getX() / deltaDistance) * force;
-				double yDisplacement = (p1.getY() - p2.getY() / deltaDistance) * force;
-				double zDisplacement = (p1.getZ() - p2.getZ() / deltaDistance) * force;
+				// Calculate normalized direction vector from v2 to v1 (repulsion pushes v1 away
+				// from v2)
+				double xDisplacement = ((p1.getX() - p2.getX()) / deltaDistance) * force;
+				double yDisplacement = ((p1.getY() - p2.getY()) / deltaDistance) * force;
+				double zDisplacement = ((p1.getZ() - p2.getZ()) / deltaDistance) * force;
 
 				// If other Vertex is locked push harder...
 				int updateScaler = v2.isLocked() ? lockedVertexForceScaler : 1;
@@ -425,23 +483,31 @@ public class FR3DLayout {
 			Point3D p1 = locations.getUnchecked(sV);
 			Point3D p2 = locations.getUnchecked(tV);
 
-			double deltaDistance = Math.max(EPSILON, p1.distanceSq(p2));
-			double force = (deltaDistance * deltaDistance) / attractionForce;
+			double deltaDistanceSq = Math.max(EPSILON, p1.distanceSq(p2));
+			double deltaDistance = Math.sqrt(deltaDistanceSq);
+			double force = (deltaDistanceSq) / attractionForce;
 
 			if (Double.isNaN(force)) {
 				throw new RuntimeException("calculateAttractionOffsets() found NaN value for: force");
 			}
 
-			double xDisplacement = (p1.getX() - p2.getX() / deltaDistance) * force;
-			double yDisplacement = (p1.getY() - p2.getY() / deltaDistance) * force;
-			double zDisplacement = (p1.getZ() - p2.getZ() / deltaDistance) * force;
+			// Calculate normalized direction vector from p1 to p2 (attraction pulls
+			// vertices together)
+			double xDirection = (p2.getX() - p1.getX()) / deltaDistance;
+			double yDirection = (p2.getY() - p1.getY()) / deltaDistance;
+			double zDirection = (p2.getZ() - p1.getZ()) / deltaDistance;
+
+			double xDisplacement = xDirection * force;
+			double yDisplacement = yDirection * force;
+			double zDisplacement = zDirection * force;
 
 			// If other Vertex is locked, pull harder on the moving vertex...
 			int sourceScaler = tV.isLocked() ? lockedVertexForceScaler : 1;
 			int targetScaler = sV.isLocked() ? lockedVertexForceScaler : 1;
 
-			updateOffset(sV, -xDisplacement, -yDisplacement, -zDisplacement, sourceScaler);
-			updateOffset(sV, xDisplacement, yDisplacement, zDisplacement, targetScaler);
+			// Apply attraction: source moves toward target, target moves toward source
+			updateOffset(sV, xDisplacement, yDisplacement, zDisplacement, sourceScaler);
+			updateOffset(tV, -xDisplacement, -yDisplacement, -zDisplacement, targetScaler);
 		} catch (Exception exception) {
 			logger.logError("calculateAttractionOffsets()", exception);
 		}
