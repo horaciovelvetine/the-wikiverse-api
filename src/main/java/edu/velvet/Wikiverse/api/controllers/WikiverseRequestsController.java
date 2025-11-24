@@ -2,6 +2,7 @@ package edu.velvet.Wikiverse.api.controllers;
 
 import edu.velvet.Wikiverse.api.models.WikiverseError;
 import edu.velvet.Wikiverse.api.models.requests.GraphsetRequest;
+import edu.velvet.Wikiverse.api.models.requests.LayoutRequest;
 import edu.velvet.Wikiverse.api.models.requests.Request;
 import edu.velvet.Wikiverse.api.models.requests.SearchRequest;
 import edu.velvet.Wikiverse.api.models.requests.StatusRequest;
@@ -173,8 +174,38 @@ public class WikiverseRequestsController {
 		return buildRequestResponse(request.initializeData(wikidata));
 	}
 
+	/**
+	 * Refreshes the layout of a graphset using the provided layout request.
+	 *
+	 * <p>
+	 * This endpoint accepts a POST request containing a {@link LayoutRequest} with
+	 * the necessary metadata and graphset data to perform a layout update. The
+	 * layout
+	 * algorithm is executed server-side, updating vertex positions according to the
+	 * specified layout settings in the request.
+	 * </p>
+	 *
+	 * <ul>
+	 * <li>Runs the layout algorithm with the given graphset and settings</li>
+	 * <li>Returns the updated layout as part of the response</li>
+	 * <li>Handles errors and returns them in the response if encountered</li>
+	 * </ul>
+	 *
+	 * @param request the LayoutRequest containing graphset and layout settings to
+	 *                refresh
+	 * @return ResponseEntity with the updated LayoutRequest, including new layout
+	 *         coordinates and any errors
+	 * @see LayoutRequest
+	 * @author The Wikiverse Team
+	 * @version 1.0
+	 * @since 1.0
+	 */
+	@PostMapping("api/layout/refresh")
+	public ResponseEntity<Request> refreshLayout(@RequestBody LayoutRequest request) {
+		return buildRequestResponse(request.updateLayout());
+	}
+
 	// TODO: PostMapping("/api/graphset/get-click-target-data")
-	// TODO: PostMapping("/api/layout/refresh-positions")
 	// TODO: PostMapping("/api/layout/update-dimensions")
 
 	// !PRIVATE ============================================================>
